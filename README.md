@@ -6,8 +6,9 @@ failures, and explain the resulting data.
 
 ## Current milestone
 
-The first milestone provides a minimal FastAPI service with configuration,
-automated tests, and an API health check.
+The service reads database metadata, generates readonly SQL with an LLM,
+validates and executes the SQL, and returns structured query results with a
+configurable row limit.
 
 ## Local development
 
@@ -48,7 +49,7 @@ Useful endpoints:
 
 - `GET /health` checks service availability.
 - `GET /api/v1/schema` returns database tables, columns, primary keys, and foreign keys.
-- `POST /api/v1/query` generates a readonly SQL query from a natural-language question.
+- `POST /api/v1/query` generates and executes a readonly SQL query from a natural-language question.
 
 For SiliconFlow, a typical local `.env` configuration is:
 
@@ -60,4 +61,5 @@ LLM_MAX_TOKENS=800
 LLM_USE_RESPONSE_FORMAT=false
 LLM_TRUST_ENV=false
 LLM_ENABLE_THINKING=false
+QUERY_MAX_ROWS=200
 ```

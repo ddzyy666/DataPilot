@@ -29,6 +29,9 @@ async def test_generate_sql_returns_readonly_query() -> None:
     assert response.question == "不同订单状态分别有多少订单？"
     assert response.sql.startswith("SELECT")
     assert "表: orders" in response.schema_context
+    assert response.columns == ["status", "order_count"]
+    assert response.rows == []
+    assert response.row_count == 0
 
 
 def test_validate_readonly_sql_rejects_mutating_statement() -> None:

@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     llm_use_response_format: bool = False
     llm_trust_env: bool = False
     llm_enable_thinking: bool | None = None
+    query_max_rows: int = 200
 
     model_config = SettingsConfigDict(
         env_file=".env",

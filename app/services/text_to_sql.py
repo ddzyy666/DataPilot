@@ -4,12 +4,14 @@ from typing import Any
 
 from sqlalchemy import Engine
 
+from app.core.config import settings
 from app.db.base import engine
 from app.db.metadata import inspect_schema
 from app.llm.client import OpenAICompatibleClient
 from app.llm.prompts import build_text_to_sql_messages
 from app.schemas.query import QueryResponse
 from app.services.schema_formatter import format_schema_for_prompt
+from app.services.sql_executor import SQLExecutor
 
 
 class SQLSafetyError(ValueError):
@@ -24,6 +26,7 @@ class TextToSQLService:
     ) -> None:
         self.llm_client = llm_client or OpenAICompatibleClient()
         self.target_engine = target_engine
+        self.sql_executor = SQLExecutor(target_engine, max_rows=settings.query_max_rows)
 
     async def generate(self, question: str) -> QueryResponse:
         schema = inspect_schema(self.target_engine)
@@ -34,6 +37,7 @@ class TextToSQLService:
 
         sql = str(payload.get("sql", "")).strip()
         self._validate_readonly_sql(sql)
+        execution = self.sql_executor.execute(sql)
 
         assumptions = payload.get("assumptions", [])
         if not isinstance(assumptions, list):
@@ -45,6 +49,11 @@ class TextToSQLService:
             explanation=str(payload.get("explanation", "")).strip(),
             assumptions=[str(item) for item in assumptions],
             schema_context=schema_context,
+            columns=execution.columns,
+            rows=execution.rows,
+            row_count=execution.row_count,
+            truncated=execution.truncated,
+            execution_time_ms=execution.execution_time_ms,
         )
 
     def _parse_model_json(self, raw_content: str) -> dict[str, Any]:
@@ -71,6 +80,10 @@ class TextToSQLService:
             raise SQLSafetyError("模型没有生成 SQL。")
         if not normalized.startswith(("select ", "with ")):
             raise SQLSafetyError("当前阶段只允许生成 SELECT/WITH 查询。")
+
+        statements = [item.strip() for item in sql.split(";") if item.strip()]
+        if len(statements) != 1:
+            raise SQLSafetyError("每次只允许执行一条 SQL 查询。")
 
         forbidden_keywords = {
             "insert",
