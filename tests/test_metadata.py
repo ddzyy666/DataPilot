@@ -1,8 +1,8 @@
 from sqlalchemy import create_engine
 
+from app.db import models  # noqa: F401
 from app.db.base import Base
 from app.db.metadata import inspect_schema
-from app.db import models  # noqa: F401
 
 
 def test_inspect_schema_returns_tables_columns_and_relationships() -> None:
@@ -34,4 +34,3 @@ def test_inspect_schema_returns_tables_columns_and_relationships() -> None:
         "referred_table": "customers",
         "referred_columns": ["id"],
     } in order_foreign_keys
-

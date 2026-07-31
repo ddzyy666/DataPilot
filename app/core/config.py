@@ -9,6 +9,14 @@ class Settings(BaseSettings):
     app_env: Literal["development", "test", "production"] = "development"
     app_debug: bool = False
     database_url: str = "sqlite:///./data/datapilot.db"
+    llm_base_url: str = "https://api.openai.com/v1"
+    llm_api_key: str | None = None
+    llm_model: str = "gpt-4o-mini"
+    llm_timeout_seconds: float = 60.0
+    llm_max_tokens: int = 800
+    llm_use_response_format: bool = False
+    llm_trust_env: bool = False
+    llm_enable_thinking: bool | None = None
 
     model_config = SettingsConfigDict(
         env_file=".env",

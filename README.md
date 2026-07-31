@@ -48,3 +48,16 @@ Useful endpoints:
 
 - `GET /health` checks service availability.
 - `GET /api/v1/schema` returns database tables, columns, primary keys, and foreign keys.
+- `POST /api/v1/query` generates a readonly SQL query from a natural-language question.
+
+For SiliconFlow, a typical local `.env` configuration is:
+
+```env
+LLM_BASE_URL=https://api.siliconflow.cn/v1
+LLM_MODEL=Qwen/Qwen3-8B
+LLM_TIMEOUT_SECONDS=60
+LLM_MAX_TOKENS=800
+LLM_USE_RESPONSE_FORMAT=false
+LLM_TRUST_ENV=false
+LLM_ENABLE_THINKING=false
+```

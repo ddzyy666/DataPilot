@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from pathlib import Path
 from random import Random
@@ -39,7 +39,7 @@ def seed_database(target_engine: Engine = engine) -> None:
         session.add_all(products)
 
         rng = Random(20260729)
-        start = datetime(2024, 1, 1, 9, 0)
+        start = datetime(2024, 1, 1, 9, 0, tzinfo=UTC)
         customers = [
             Customer(
                 name=f"客户{i:03d}",
@@ -86,4 +86,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

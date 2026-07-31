@@ -1,7 +1,6 @@
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.responses import HTMLResponse
 
-
 SWAGGER_TRANSLATION_SCRIPT = """
 <script>
 (() => {
