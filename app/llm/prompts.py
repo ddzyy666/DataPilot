@@ -26,3 +26,24 @@ def build_text_to_sql_messages(question: str, schema_context: str) -> list[dict[
             "content": f"数据库结构如下：\n{schema_context}\n\n用户问题：{question}",
         },
     ]
+
+
+def build_sql_repair_messages(
+    question: str,
+    schema_context: str,
+    failed_sql: str,
+    database_error: str,
+) -> list[dict[str, str]]:
+    return [
+        {"role": "system", "content": TEXT_TO_SQL_SYSTEM_PROMPT},
+        {
+            "role": "user",
+            "content": (
+                f"数据库结构如下：\n{schema_context}\n\n"
+                f"用户问题：{question}\n\n"
+                f"上一次生成的 SQL：\n{failed_sql}\n\n"
+                f"数据库执行错误：\n{database_error}\n\n"
+                "请根据数据库结构和错误原因修复 SQL，并按规定的 JSON 格式返回。"
+            ),
+        },
+    ]

@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     llm_trust_env: bool = False
     llm_enable_thinking: bool | None = None
     query_max_rows: int = 200
+    query_max_repair_attempts: int = 1
 
     model_config = SettingsConfigDict(
         env_file=".env",

@@ -27,5 +27,8 @@ def test_executor_uses_readonly_sqlite_connection() -> None:
     test_engine = create_engine("sqlite://")
     executor = SQLExecutor(test_engine)
 
-    with pytest.raises(SQLExecutionError):
+    with pytest.raises(SQLExecutionError) as error:
         executor.execute("CREATE TABLE forbidden_table (id INTEGER)")
+
+    assert "OperationalError" in error.value.database_error
+    assert error.value.execution_time_ms >= 0

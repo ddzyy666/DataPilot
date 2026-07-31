@@ -7,7 +7,10 @@ from sqlalchemy.exc import SQLAlchemyError
 
 
 class SQLExecutionError(RuntimeError):
-    pass
+    def __init__(self, database_error: str, execution_time_ms: float) -> None:
+        super().__init__("SQL 执行失败，且已达到自动修复次数限制。")
+        self.database_error = database_error
+        self.execution_time_ms = execution_time_ms
 
 
 @dataclass(slots=True)
@@ -38,7 +41,9 @@ class SQLExecutor:
                 columns = list(result.keys())
                 fetched_rows = result.mappings().fetchmany(self.max_rows + 1)
         except SQLAlchemyError as exc:
-            raise SQLExecutionError(f"SQL 执行失败: {exc.__class__.__name__}") from exc
+            elapsed_ms = round((perf_counter() - started_at) * 1000, 2)
+            database_error = f"{exc.__class__.__name__}: {exc}"
+            raise SQLExecutionError(database_error, elapsed_ms) from exc
 
         truncated = len(fetched_rows) > self.max_rows
         visible_rows = fetched_rows[: self.max_rows]

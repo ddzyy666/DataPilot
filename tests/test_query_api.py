@@ -28,3 +28,4 @@ async def test_query_endpoint_returns_generated_sql(monkeypatch: pytest.MonkeyPa
 
     assert response.status_code == 200
     assert response.json()["sql"] == "SELECT COUNT(*) AS order_count FROM orders"
+    assert response.json()["timings"]["total_ms"] == 0
