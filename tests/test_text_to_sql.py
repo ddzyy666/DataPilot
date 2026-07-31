@@ -32,6 +32,8 @@ async def test_generate_sql_returns_readonly_query() -> None:
     assert response.columns == ["status", "order_count"]
     assert response.rows == []
     assert response.row_count == 0
+    assert response.timings.total_ms >= response.timings.sql_execution_ms
+    assert response.timings.llm_call_ms >= 0
 
 
 def test_validate_readonly_sql_rejects_mutating_statement() -> None:

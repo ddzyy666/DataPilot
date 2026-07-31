@@ -13,6 +13,17 @@ class QueryRequest(BaseModel):
     )
 
 
+class StageTimings(BaseModel):
+    schema_inspection_ms: float = Field(default=0, description="读取数据库结构耗时")
+    schema_formatting_ms: float = Field(default=0, description="格式化 Schema 上下文耗时")
+    prompt_building_ms: float = Field(default=0, description="构造模型 Prompt 耗时")
+    llm_call_ms: float = Field(default=0, description="调用模型服务耗时")
+    response_parsing_ms: float = Field(default=0, description="解析模型响应耗时")
+    sql_validation_ms: float = Field(default=0, description="SQL 安全校验耗时")
+    sql_execution_ms: float = Field(default=0, description="执行 SQL 耗时")
+    total_ms: float = Field(default=0, description="完整请求处理耗时")
+
+
 class QueryResponse(BaseModel):
     question: str = Field(description="原始用户问题")
     sql: str = Field(description="生成的只读 SQL")
@@ -24,3 +35,4 @@ class QueryResponse(BaseModel):
     row_count: int = Field(default=0, description="本次实际返回的数据行数")
     truncated: bool = Field(default=False, description="结果是否因行数限制被截断")
     execution_time_ms: float = Field(default=0, description="SQL 执行耗时（毫秒）")
+    timings: StageTimings = Field(default_factory=StageTimings, description="各处理阶段耗时")

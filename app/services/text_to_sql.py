@@ -1,5 +1,6 @@
 import json
 import re
+from time import perf_counter
 from typing import Any
 
 from sqlalchemy import Engine
@@ -9,7 +10,7 @@ from app.db.base import engine
 from app.db.metadata import inspect_schema
 from app.llm.client import OpenAICompatibleClient
 from app.llm.prompts import build_text_to_sql_messages
-from app.schemas.query import QueryResponse
+from app.schemas.query import QueryResponse, StageTimings
 from app.services.schema_formatter import format_schema_for_prompt
 from app.services.sql_executor import SQLExecutor
 
@@ -29,14 +30,33 @@ class TextToSQLService:
         self.sql_executor = SQLExecutor(target_engine, max_rows=settings.query_max_rows)
 
     async def generate(self, question: str) -> QueryResponse:
-        schema = inspect_schema(self.target_engine)
-        schema_context = format_schema_for_prompt(schema)
-        messages = build_text_to_sql_messages(question, schema_context)
-        raw_content = await self.llm_client.complete(messages)
-        payload = self._parse_model_json(raw_content)
+        total_started_at = perf_counter()
 
+        stage_started_at = perf_counter()
+        schema = inspect_schema(self.target_engine)
+        schema_inspection_ms = self._elapsed_ms(stage_started_at)
+
+        stage_started_at = perf_counter()
+        schema_context = format_schema_for_prompt(schema)
+        schema_formatting_ms = self._elapsed_ms(stage_started_at)
+
+        stage_started_at = perf_counter()
+        messages = build_text_to_sql_messages(question, schema_context)
+        prompt_building_ms = self._elapsed_ms(stage_started_at)
+
+        stage_started_at = perf_counter()
+        raw_content = await self.llm_client.complete(messages)
+        llm_call_ms = self._elapsed_ms(stage_started_at)
+
+        stage_started_at = perf_counter()
+        payload = self._parse_model_json(raw_content)
+        response_parsing_ms = self._elapsed_ms(stage_started_at)
+
+        stage_started_at = perf_counter()
         sql = str(payload.get("sql", "")).strip()
         self._validate_readonly_sql(sql)
+        sql_validation_ms = self._elapsed_ms(stage_started_at)
+
         execution = self.sql_executor.execute(sql)
 
         assumptions = payload.get("assumptions", [])
@@ -54,7 +74,21 @@ class TextToSQLService:
             row_count=execution.row_count,
             truncated=execution.truncated,
             execution_time_ms=execution.execution_time_ms,
+            timings=StageTimings(
+                schema_inspection_ms=schema_inspection_ms,
+                schema_formatting_ms=schema_formatting_ms,
+                prompt_building_ms=prompt_building_ms,
+                llm_call_ms=llm_call_ms,
+                response_parsing_ms=response_parsing_ms,
+                sql_validation_ms=sql_validation_ms,
+                sql_execution_ms=execution.execution_time_ms,
+                total_ms=self._elapsed_ms(total_started_at),
+            ),
         )
+
+    @staticmethod
+    def _elapsed_ms(started_at: float) -> float:
+        return round((perf_counter() - started_at) * 1000, 2)
 
     def _parse_model_json(self, raw_content: str) -> dict[str, Any]:
         content = raw_content.strip()
