@@ -18,7 +18,6 @@ from app.schemas.query import QueryResponse, StageTimings
 from app.services.schema_formatter import format_schema_for_prompt
 from app.services.sql_executor import SQLExecutionError, SQLExecutor
 
-
 class SQLSafetyError(ValueError):
     pass
 
