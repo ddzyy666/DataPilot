@@ -16,7 +16,8 @@
         {
           "region_count": 5
         }
-      ],
+      ], 
+      
       "passed": true,
       "generated_sql": "SELECT COUNT(*) FROM regions",
       "actual_rows": [
