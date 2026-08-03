@@ -9,7 +9,11 @@ from app.core.config import settings
 from app.db.base import engine
 from app.db.metadata import inspect_schema
 from app.llm.client import OpenAICompatibleClient
-from app.llm.prompts import build_sql_repair_messages, build_text_to_sql_messages
+from app.llm.prompts import (
+    build_sql_repair_messages,
+    build_sql_review_messages,
+    build_text_to_sql_messages,
+)
 from app.schemas.query import QueryResponse, StageTimings
 from app.services.schema_formatter import format_schema_for_prompt
 from app.services.sql_executor import SQLExecutionError, SQLExecutor
@@ -29,40 +33,65 @@ class TextToSQLService:
         self.target_engine = target_engine
         self.sql_executor = SQLExecutor(target_engine, max_rows=settings.query_max_rows)
         self.max_repair_attempts = settings.query_max_repair_attempts
+        self.enable_sql_review = settings.query_enable_sql_review
 
     async def generate(self, question: str) -> QueryResponse:
         total_started_at = perf_counter()
 
-        stage_started_at = perf_counter()
+        schema_started_at = perf_counter()
         schema = inspect_schema(self.target_engine)
-        schema_inspection_ms = self._elapsed_ms(stage_started_at)
-
-        stage_started_at = perf_counter()
         schema_context = format_schema_for_prompt(schema)
-        schema_formatting_ms = self._elapsed_ms(stage_started_at)
+        schema_processing_ms = self._elapsed_ms(schema_started_at)
 
-        stage_started_at = perf_counter()
         messages = build_text_to_sql_messages(question, schema_context)
-        prompt_building_ms = self._elapsed_ms(stage_started_at)
 
         stage_started_at = perf_counter()
         raw_content = await self.llm_client.complete(messages)
-        llm_call_ms = self._elapsed_ms(stage_started_at)
+        sql_generation_llm_ms = self._elapsed_ms(stage_started_at)
 
-        stage_started_at = perf_counter()
         payload = self._parse_model_json(raw_content)
-        response_parsing_ms = self._elapsed_ms(stage_started_at)
 
-        stage_started_at = perf_counter()
         sql = str(payload.get("sql", "")).strip()
         self._validate_readonly_sql(sql)
-        sql_validation_ms = self._elapsed_ms(stage_started_at)
+
+        reviewed = False
+        review_passed: bool | None = None
+        review_issues: list[str] = []
+        was_review_corrected = False
+        review_llm_call_ms = 0.0
+
+        if self.enable_sql_review:
+            reviewed = True
+
+            review_messages = build_sql_review_messages(question, schema_context, sql)
+
+            stage_started_at = perf_counter()
+            review_content = await self.llm_client.complete(review_messages)
+            review_llm_call_ms = self._elapsed_ms(stage_started_at)
+
+            review_payload = self._parse_model_json(review_content)
+
+            if not isinstance(review_payload.get("is_correct"), bool):
+                raise ValueError("SQL 审核器没有返回合法的 is_correct 字段。")
+            review_passed = review_payload["is_correct"]
+
+            issues = review_payload.get("issues", [])
+            if not isinstance(issues, list):
+                issues = [str(issues)]
+            review_issues = [str(item) for item in issues]
+
+            if not review_passed:
+                corrected_sql = str(review_payload.get("corrected_sql") or "").strip()
+                self._validate_readonly_sql(corrected_sql)
+                sql = corrected_sql
+                was_review_corrected = True
+
+                review_explanation = str(review_payload.get("explanation", "")).strip()
+                if review_explanation:
+                    payload["explanation"] = review_explanation
 
         execution_time_ms = 0.0
-        repair_prompt_building_ms = 0.0
         repair_llm_call_ms = 0.0
-        repair_response_parsing_ms = 0.0
-        repair_sql_validation_ms = 0.0
         repair_attempts = 0
 
         while True:
@@ -77,31 +106,35 @@ class TextToSQLService:
 
                 repair_attempts += 1
 
-                stage_started_at = perf_counter()
                 repair_messages = build_sql_repair_messages(
                     question=question,
                     schema_context=schema_context,
                     failed_sql=sql,
                     database_error=exc.database_error,
                 )
-                repair_prompt_building_ms += self._elapsed_ms(stage_started_at)
 
                 stage_started_at = perf_counter()
                 repaired_content = await self.llm_client.complete(repair_messages)
                 repair_llm_call_ms += self._elapsed_ms(stage_started_at)
 
-                stage_started_at = perf_counter()
                 payload = self._parse_model_json(repaired_content)
-                repair_response_parsing_ms += self._elapsed_ms(stage_started_at)
 
-                stage_started_at = perf_counter()
                 sql = str(payload.get("sql", "")).strip()
                 self._validate_readonly_sql(sql)
-                repair_sql_validation_ms += self._elapsed_ms(stage_started_at)
 
         assumptions = payload.get("assumptions", [])
         if not isinstance(assumptions, list):
             assumptions = [str(assumptions)]
+
+        total_ms = self._elapsed_ms(total_started_at)
+        llm_total_ms = round(
+            sql_generation_llm_ms + review_llm_call_ms + repair_llm_call_ms,
+            2,
+        )
+        other_processing_ms = round(
+            max(0.0, total_ms - schema_processing_ms - llm_total_ms - execution_time_ms),
+            2,
+        )
 
         return QueryResponse(
             question=question,
@@ -116,19 +149,16 @@ class TextToSQLService:
             execution_time_ms=execution_time_ms,
             was_repaired=repair_attempts > 0,
             repair_attempts=repair_attempts,
+            reviewed=reviewed,
+            review_passed=review_passed,
+            review_issues=review_issues,
+            was_review_corrected=was_review_corrected,
             timings=StageTimings(
-                schema_inspection_ms=schema_inspection_ms,
-                schema_formatting_ms=schema_formatting_ms,
-                prompt_building_ms=prompt_building_ms,
-                llm_call_ms=llm_call_ms,
-                response_parsing_ms=response_parsing_ms,
-                sql_validation_ms=sql_validation_ms,
+                schema_processing_ms=schema_processing_ms,
+                llm_total_ms=llm_total_ms,
                 sql_execution_ms=execution_time_ms,
-                repair_prompt_building_ms=repair_prompt_building_ms,
-                repair_llm_call_ms=repair_llm_call_ms,
-                repair_response_parsing_ms=repair_response_parsing_ms,
-                repair_sql_validation_ms=repair_sql_validation_ms,
-                total_ms=self._elapsed_ms(total_started_at),
+                other_processing_ms=other_processing_ms,
+                total_ms=total_ms,
             ),
         )
 

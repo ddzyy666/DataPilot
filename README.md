@@ -7,8 +7,9 @@ failures, and explain the resulting data.
 ## Current milestone
 
 The service reads database metadata, generates readonly SQL with an LLM,
-validates and executes the SQL, automatically repairs failed SQL once, and
-returns structured query results with per-stage timings and a configurable row limit.
+reviews SQL semantics against the question and schema, validates and executes
+the SQL, automatically repairs failed SQL once, and returns structured query
+results with per-stage timings and a configurable row limit.
 
 ## Local development
 
@@ -63,4 +64,5 @@ LLM_TRUST_ENV=false
 LLM_ENABLE_THINKING=false
 QUERY_MAX_ROWS=200
 QUERY_MAX_REPAIR_ATTEMPTS=1
+QUERY_ENABLE_SQL_REVIEW=true
 ```
