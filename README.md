@@ -32,6 +32,18 @@ Run tests:
 python -m pytest
 ```
 
+Validate all 50 golden SQL answers without calling the LLM:
+
+```powershell
+datapilot-benchmark --gold-only
+```
+
+Run the full 50-question LLM benchmark and write a JSON report:
+
+```powershell
+datapilot-benchmark
+```
+
 Initialize the deterministic e-commerce demo database:
 
 ```powershell

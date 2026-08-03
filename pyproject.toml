@@ -24,6 +24,7 @@ dev = [
 
 [project.scripts]
 datapilot-seed = "app.db.seed:main"
+datapilot-benchmark = "app.evaluation.benchmark:main"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
