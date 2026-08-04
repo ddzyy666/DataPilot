@@ -24,6 +24,10 @@ def load_cases(dataset_path: Path = DEFAULT_DATASET) -> list[dict[str, Any]]:
 
 
 def _normalize_value(value: Any) -> Any:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, int):
+        return round(float(value), 6)
     if isinstance(value, Decimal):
         return round(float(value), 6)
     if isinstance(value, float):
@@ -110,6 +114,28 @@ async def run_benchmark(cases: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def recalculate_report(report_path: Path) -> dict[str, Any]:
+    with report_path.open(encoding="utf-8") as file:
+        report = json.load(file)
+
+    results = report.get("results", [])
+    for item in results:
+        item["passed"] = bool(
+            not item.get("error")
+            and normalize_rows(item.get("actual_rows", []))
+            == normalize_rows(item.get("expected_rows", []))
+        )
+
+    passed_count = sum(1 for item in results if item["passed"])
+    report["summary"] = {
+        "total": len(results),
+        "passed": passed_count,
+        "failed": len(results) - passed_count,
+        "accuracy": round(passed_count / len(results), 4) if results else 0,
+    }
+    return report
+
+
 def _json_default(value: Any) -> Any:
     normalized = _normalize_value(value)
     if normalized is value:
@@ -121,17 +147,21 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="运行 DataPilot 50 题 Text-to-SQL 评测")
     parser.add_argument("--limit", type=int, default=50, help="最多运行多少道题")
     parser.add_argument("--gold-only", action="store_true", help="只验证标准 SQL，不调用模型")
+    parser.add_argument("--recalculate", action="store_true", help="重新计算已有报告的通过率")
     parser.add_argument("--output", type=Path, default=DEFAULT_REPORT, help="评测报告路径")
     args = parser.parse_args()
 
-    cases = load_cases()[: args.limit]
-    if args.gold_only:
+    if args.recalculate:
+        report = recalculate_report(args.output)
+    elif args.gold_only:
+        cases = load_cases()[: args.limit]
         validated = validate_gold_answers(cases)
         report: dict[str, Any] = {
             "summary": {"total": len(validated), "gold_sql_valid": len(validated)},
             "results": validated,
         }
     else:
+        cases = load_cases()[: args.limit]
         report = asyncio.run(run_benchmark(cases))
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
