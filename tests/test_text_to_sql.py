@@ -13,6 +13,13 @@ class FakeLLMClient(OpenAICompatibleClient):
             return """
             {
               "is_correct": true,
+              "checks": {
+                "metric_correct": true,
+                "dimensions_correct": true,
+                "filters_correct": true,
+                "joins_correct": true,
+                "output_correct": true
+              },
               "issues": [],
               "corrected_sql": null,
               "explanation": "SQL 与用户问题一致。"
@@ -39,6 +46,13 @@ class RepairingFakeLLMClient(OpenAICompatibleClient):
             return """
             {
               "is_correct": true,
+              "checks": {
+                "metric_correct": true,
+                "dimensions_correct": true,
+                "filters_correct": true,
+                "joins_correct": true,
+                "output_correct": true
+              },
               "issues": [],
               "corrected_sql": null,
               "explanation": "审核通过。"
@@ -67,6 +81,13 @@ class ReviewingFakeLLMClient(OpenAICompatibleClient):
             return """
             {
               "is_correct": false,
+              "checks": {
+                "metric_correct": false,
+                "dimensions_correct": true,
+                "filters_correct": true,
+                "joins_correct": true,
+                "output_correct": true
+              },
               "issues": ["用户要求统计数量，但候选 SQL 没有使用 COUNT。"],
               "corrected_sql": "SELECT COUNT(*) AS order_count FROM orders",
               "explanation": "改为使用 COUNT 统计订单数量。"
@@ -100,6 +121,7 @@ async def test_generate_sql_returns_readonly_query() -> None:
     assert response.timings.other_processing_ms >= 0
     assert response.reviewed is True
     assert response.review_passed is True
+    assert all(response.review_checks.values())
     assert response.was_review_corrected is False
 
 
@@ -116,6 +138,7 @@ async def test_reviewer_corrects_semantically_wrong_sql_before_execution() -> No
     assert response.review_passed is False
     assert response.was_review_corrected is True
     assert response.review_issues == ["用户要求统计数量，但候选 SQL 没有使用 COUNT。"]
+    assert response.review_checks["metric_correct"] is False
     assert response.rows == [{"order_count": 0}]
     assert response.timings.llm_total_ms >= 0
 

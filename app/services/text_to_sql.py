@@ -57,6 +57,7 @@ class TextToSQLService:
         reviewed = False
         review_passed: bool | None = None
         review_issues: list[str] = []
+        review_checks: dict[str, bool] = {}
         was_review_corrected = False
         review_llm_call_ms = 0.0
 
@@ -73,7 +74,23 @@ class TextToSQLService:
 
             if not isinstance(review_payload.get("is_correct"), bool):
                 raise ValueError("SQL 审核器没有返回合法的 is_correct 字段。")
-            review_passed = review_payload["is_correct"]
+
+            expected_checks = {
+                "metric_correct",
+                "dimensions_correct",
+                "filters_correct",
+                "joins_correct",
+                "output_correct",
+            }
+            raw_checks = review_payload.get("checks")
+            if not isinstance(raw_checks, dict):
+                raise ValueError("SQL 审核器没有返回合法的 checks 字段。")
+            if not expected_checks.issubset(raw_checks):
+                raise ValueError("SQL 审核器返回的 checks 字段不完整。")
+            if any(not isinstance(raw_checks[name], bool) for name in expected_checks):
+                raise ValueError("SQL 审核器的检查结果必须是布尔值。")
+            review_checks = {name: raw_checks[name] for name in sorted(expected_checks)}
+            review_passed = review_payload["is_correct"] and all(review_checks.values())
 
             issues = review_payload.get("issues", [])
             if not isinstance(issues, list):
@@ -152,6 +169,7 @@ class TextToSQLService:
             reviewed=reviewed,
             review_passed=review_passed,
             review_issues=review_issues,
+            review_checks=review_checks,
             was_review_corrected=was_review_corrected,
             timings=StageTimings(
                 schema_processing_ms=schema_processing_ms,

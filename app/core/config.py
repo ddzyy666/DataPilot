@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     llm_use_response_format: bool = False
     llm_trust_env: bool = False
     llm_enable_thinking: bool | None = None
+    llm_max_retries: int = 1
+    llm_retry_delay_seconds: float = 1.0
     query_max_rows: int = 200
     query_max_repair_attempts: int = 1
     query_enable_sql_review: bool = True

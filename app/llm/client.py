@@ -1,3 +1,4 @@
+import asyncio
 from typing import Any
 
 import httpx
@@ -24,6 +25,8 @@ class OpenAICompatibleClient:
         use_response_format: bool = settings.llm_use_response_format,
         trust_env: bool = settings.llm_trust_env,
         enable_thinking: bool | None = settings.llm_enable_thinking,
+        max_retries: int = settings.llm_max_retries,
+        retry_delay_seconds: float = settings.llm_retry_delay_seconds,
     ) -> None:
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
@@ -33,6 +36,8 @@ class OpenAICompatibleClient:
         self.use_response_format = use_response_format
         self.trust_env = trust_env
         self.enable_thinking = enable_thinking
+        self.max_retries = max(0, max_retries)
+        self.retry_delay_seconds = max(0.0, retry_delay_seconds)
 
     async def complete(self, messages: list[dict[str, str]]) -> str:
         if not self.api_key:
@@ -55,30 +60,42 @@ class OpenAICompatibleClient:
             "User-Agent": "DataPilot/0.1.0",
         }
 
-        try:
-            async with httpx.AsyncClient(
-                timeout=self.timeout_seconds,
-                trust_env=self.trust_env,
-            ) as client:
-                response = await client.post(
-                    f"{self.base_url}/chat/completions",
-                    json=payload,
-                    headers=headers,
-                )
-        except httpx.TimeoutException as exc:
-            raise LLMResponseError("模型服务请求超时，请检查网络、模型地址或调大超时时间。") from exc
-        except httpx.RemoteProtocolError as exc:
-            raise LLMResponseError(
-                "模型服务连接被中途断开，常见原因是系统代理不稳定、模型地址异常或服务端临时断流。"
-            ) from exc
-        except httpx.RequestError as exc:
-            raise LLMResponseError(f"模型服务请求失败: {exc.__class__.__name__}") from exc
+        retryable_status_codes = {429, 502, 503, 504}
+        async with httpx.AsyncClient(
+            timeout=self.timeout_seconds,
+            trust_env=self.trust_env,
+        ) as client:
+            for attempt in range(self.max_retries + 1):
+                try:
+                    response = await client.post(
+                        f"{self.base_url}/chat/completions",
+                        json=payload,
+                        headers=headers,
+                    )
+                except (httpx.TimeoutException, httpx.RemoteProtocolError) as exc:
+                    if attempt < self.max_retries:
+                        await asyncio.sleep(self.retry_delay_seconds)
+                        continue
+                    if isinstance(exc, httpx.TimeoutException):
+                        raise LLMResponseError(
+                            "模型服务请求超时，已达到最大重试次数。"
+                        ) from exc
+                    raise LLMResponseError(
+                        "模型服务连接被中途断开，已达到最大重试次数。"
+                    ) from exc
+                except httpx.RequestError as exc:
+                    raise LLMResponseError(f"模型服务请求失败: {exc.__class__.__name__}") from exc
 
-        if response.status_code >= 400:
-            raise LLMResponseError(f"模型服务返回异常: HTTP {response.status_code}")
+                if response.status_code in retryable_status_codes and attempt < self.max_retries:
+                    await asyncio.sleep(self.retry_delay_seconds)
+                    continue
+                if response.status_code >= 400:
+                    raise LLMResponseError(f"模型服务返回异常: HTTP {response.status_code}")
 
-        data = response.json()
-        try:
-            return data["choices"][0]["message"]["content"]
-        except (KeyError, IndexError, TypeError) as exc:
-            raise LLMResponseError("模型响应格式不符合 OpenAI-compatible 规范。") from exc
+                data = response.json()
+                try:
+                    return data["choices"][0]["message"]["content"]
+                except (KeyError, IndexError, TypeError) as exc:
+                    raise LLMResponseError("模型响应格式不符合 OpenAI-compatible 规范。") from exc
+
+        raise LLMResponseError("模型服务请求失败。")

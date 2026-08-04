@@ -37,5 +37,6 @@ class QueryResponse(BaseModel):
     reviewed: bool = Field(default=False, description="是否执行了 SQL 语义审核")
     review_passed: bool | None = Field(default=None, description="首次 SQL 是否通过语义审核")
     review_issues: list[str] = Field(default_factory=list, description="语义审核发现的问题")
+    review_checks: dict[str, bool] = Field(default_factory=dict, description="语义审核检查项")
     was_review_corrected: bool = Field(default=False, description="SQL 是否被审核器改写")
     timings: StageTimings = Field(default_factory=StageTimings, description="各处理阶段耗时")
