@@ -63,6 +63,7 @@ Useful endpoints:
 - `GET /health` checks service availability.
 - `GET /api/v1/schema` returns database tables, columns, primary keys, and foreign keys.
 - `POST /api/v1/query` generates and executes a readonly SQL query from a natural-language question.
+- `GET /api/v1/audit/{request_id}` returns the audit record for one query request.
 
 For SiliconFlow, a typical local `.env` configuration is:
 

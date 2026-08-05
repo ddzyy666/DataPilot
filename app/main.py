@@ -25,6 +25,10 @@ def create_app() -> FastAPI:
                 "name": "数据库",
                 "description": "查看数据表、字段、主键和外键等数据库元数据。",
             },
+            {
+                "name": "审计",
+                "description": "根据请求追踪ID查询Text-to-SQL审计记录。",
+            },
         ],
     )
 

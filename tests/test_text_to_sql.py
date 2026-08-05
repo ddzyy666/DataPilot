@@ -106,7 +106,11 @@ class ReviewingFakeLLMClient(OpenAICompatibleClient):
 async def test_generate_sql_returns_readonly_query() -> None:
     test_engine = create_engine("sqlite://")
     Base.metadata.create_all(test_engine)
-    service = TextToSQLService(llm_client=FakeLLMClient(), target_engine=test_engine)
+    service = TextToSQLService(
+        llm_client=FakeLLMClient(),
+        target_engine=test_engine,
+        enable_sql_review=True,
+    )
 
     response = await service.generate("不同订单状态分别有多少订单？")
 
@@ -129,7 +133,11 @@ async def test_generate_sql_returns_readonly_query() -> None:
 async def test_reviewer_corrects_semantically_wrong_sql_before_execution() -> None:
     test_engine = create_engine("sqlite://")
     Base.metadata.create_all(test_engine)
-    service = TextToSQLService(llm_client=ReviewingFakeLLMClient(), target_engine=test_engine)
+    service = TextToSQLService(
+        llm_client=ReviewingFakeLLMClient(),
+        target_engine=test_engine,
+        enable_sql_review=True,
+    )
 
     response = await service.generate("统计订单数量")
 
@@ -148,7 +156,11 @@ async def test_generate_repairs_failed_sql_and_executes_again() -> None:
     test_engine = create_engine("sqlite://")
     Base.metadata.create_all(test_engine)
     fake_client = RepairingFakeLLMClient()
-    service = TextToSQLService(llm_client=fake_client, target_engine=test_engine)
+    service = TextToSQLService(
+        llm_client=fake_client,
+        target_engine=test_engine,
+        enable_sql_review=True,
+    )
 
     response = await service.generate("查询订单状态")
 

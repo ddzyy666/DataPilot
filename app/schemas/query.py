@@ -22,6 +22,7 @@ class StageTimings(BaseModel):
 
 
 class QueryResponse(BaseModel):
+    request_id: str = Field(default="", description="请求追踪ID")
     question: str = Field(description="原始用户问题")
     sql: str = Field(description="生成的只读 SQL")
     explanation: str = Field(description="SQL 思路说明")

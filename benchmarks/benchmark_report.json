@@ -1,9 +1,9 @@
 {
   "summary": {
     "total": 50,
-    "passed": 34,
-    "failed": 16,
-    "accuracy": 0.68
+    "passed": 46,
+    "failed": 4,
+    "accuracy": 0.92
   },
   "results": [
     {
@@ -18,20 +18,20 @@
         }
       ],
       "passed": true,
-      "generated_sql": "SELECT COUNT(DISTINCT regions.id) FROM regions",
+      "generated_sql": "SELECT COUNT(*) AS region_count FROM regions;",
       "actual_rows": [
         {
-          "COUNT(DISTINCT regions.id)": 5
+          "region_count": 5
         }
       ],
       "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 2.72,
-        "llm_total_ms": 43079.75,
-        "sql_execution_ms": 0.47,
-        "other_processing_ms": 0.14,
-        "total_ms": 43083.08
+        "schema_processing_ms": 2.78,
+        "llm_total_ms": 21817.64,
+        "sql_execution_ms": 0.42,
+        "other_processing_ms": 0.11,
+        "total_ms": 21820.95
       }
     },
     {
@@ -58,7 +58,7 @@
         }
       ],
       "passed": true,
-      "generated_sql": "SELECT regions.name FROM regions ORDER BY regions.name",
+      "generated_sql": "SELECT name FROM regions ORDER BY name;",
       "actual_rows": [
         {
           "name": "东北"
@@ -79,11 +79,11 @@
       "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 4.28,
-        "llm_total_ms": 7017.77,
-        "sql_execution_ms": 0.4,
-        "other_processing_ms": 0.1,
-        "total_ms": 7022.55
+        "schema_processing_ms": 2.75,
+        "llm_total_ms": 12548.64,
+        "sql_execution_ms": 0.41,
+        "other_processing_ms": 0.06,
+        "total_ms": 12551.86
       }
     },
     {
@@ -98,20 +98,20 @@
         }
       ],
       "passed": true,
-      "generated_sql": "SELECT COUNT(DISTINCT customer_id) FROM orders",
+      "generated_sql": "SELECT COUNT(*) AS customer_count FROM customers;",
       "actual_rows": [
         {
-          "COUNT(DISTINCT customer_id)": 50
+          "customer_count": 50
         }
       ],
       "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 2.17,
-        "llm_total_ms": 5458.69,
-        "sql_execution_ms": 0.49,
-        "other_processing_ms": 0.08,
-        "total_ms": 5461.43
+        "schema_processing_ms": 1.94,
+        "llm_total_ms": 5267.84,
+        "sql_execution_ms": 0.36,
+        "other_processing_ms": 0.05,
+        "total_ms": 5270.19
       }
     },
     {
@@ -126,20 +126,20 @@
         }
       ],
       "passed": true,
-      "generated_sql": "SELECT COUNT(*) AS 商品数量 FROM products",
+      "generated_sql": "SELECT COUNT(*) AS 商品数量 FROM products;",
       "actual_rows": [
         {
           "商品数量": 8
         }
       ],
-      "was_review_corrected": true,
+      "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 1.88,
-        "llm_total_ms": 11352.3,
-        "sql_execution_ms": 0.36,
-        "other_processing_ms": 0.11,
-        "total_ms": 11354.65
+        "schema_processing_ms": 1.69,
+        "llm_total_ms": 1651.09,
+        "sql_execution_ms": 0.38,
+        "other_processing_ms": 0.06,
+        "total_ms": 1653.22
       }
     },
     {
@@ -183,7 +183,7 @@
         }
       ],
       "passed": true,
-      "generated_sql": "SELECT products.name, products.price FROM products ORDER BY products.price DESC",
+      "generated_sql": "SELECT name, price FROM products ORDER BY price DESC, name ASC",
       "actual_rows": [
         {
           "name": "人体工学椅",
@@ -221,11 +221,11 @@
       "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 2.01,
-        "llm_total_ms": 7018.78,
-        "sql_execution_ms": 0.4,
-        "other_processing_ms": 0.08,
-        "total_ms": 7021.27
+        "schema_processing_ms": 1.68,
+        "llm_total_ms": 30557.17,
+        "sql_execution_ms": 0.41,
+        "other_processing_ms": 0.05,
+        "total_ms": 30559.31
       }
     },
     {
@@ -241,7 +241,7 @@
         }
       ],
       "passed": true,
-      "generated_sql": "SELECT products.name, products.price FROM products ORDER BY products.price DESC LIMIT 1",
+      "generated_sql": "SELECT name, price FROM products ORDER BY price DESC, name ASC LIMIT 1",
       "actual_rows": [
         {
           "name": "人体工学椅",
@@ -251,11 +251,11 @@
       "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 2.0,
-        "llm_total_ms": 73222.47,
-        "sql_execution_ms": 0.45,
-        "other_processing_ms": 0.07,
-        "total_ms": 73224.99
+        "schema_processing_ms": 1.66,
+        "llm_total_ms": 12043.57,
+        "sql_execution_ms": 0.5,
+        "other_processing_ms": 0.05,
+        "total_ms": 12045.78
       }
     },
     {
@@ -271,7 +271,7 @@
         }
       ],
       "passed": true,
-      "generated_sql": "SELECT products.name, products.price FROM products ORDER BY products.price ASC LIMIT 1",
+      "generated_sql": "SELECT name, price FROM products ORDER BY price ASC LIMIT 1;",
       "actual_rows": [
         {
           "name": "保温杯",
@@ -281,11 +281,11 @@
       "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 1.92,
-        "llm_total_ms": 16749.57,
-        "sql_execution_ms": 0.41,
-        "other_processing_ms": 0.09,
-        "total_ms": 16751.99
+        "schema_processing_ms": 3.99,
+        "llm_total_ms": 70286.64,
+        "sql_execution_ms": 0.48,
+        "other_processing_ms": 0.06,
+        "total_ms": 70291.17
       }
     },
     {
@@ -309,29 +309,29 @@
         }
       ],
       "passed": true,
-      "generated_sql": "SELECT status, COUNT(*) AS 订单数量 FROM orders GROUP BY status HAVING status IN ('paid', 'cancelled', 'pending')",
+      "generated_sql": "SELECT status, COUNT(*) AS order_count FROM orders WHERE status IN ('paid', 'cancelled', 'pending') GROUP BY status",
       "actual_rows": [
         {
           "status": "cancelled",
-          "订单数量": 34
+          "order_count": 34
         },
         {
           "status": "paid",
-          "订单数量": 345
+          "order_count": 345
         },
         {
           "status": "pending",
-          "订单数量": 21
+          "order_count": 21
         }
       ],
       "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 7.11,
-        "llm_total_ms": 24846.38,
-        "sql_execution_ms": 0.57,
-        "other_processing_ms": 0.1,
-        "total_ms": 24854.16
+        "schema_processing_ms": 1.84,
+        "llm_total_ms": 2012.52,
+        "sql_execution_ms": 0.58,
+        "other_processing_ms": 0.05,
+        "total_ms": 2014.99
       }
     },
     {
@@ -346,20 +346,20 @@
         }
       ],
       "passed": true,
-      "generated_sql": "SELECT COUNT(*) FROM orders WHERE status = 'paid';",
+      "generated_sql": "SELECT COUNT(*) AS paid_order_count FROM orders WHERE status = 'paid';",
       "actual_rows": [
         {
-          "COUNT(*)": 345
+          "paid_order_count": 345
         }
       ],
       "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 2.29,
-        "llm_total_ms": 55814.47,
-        "sql_execution_ms": 0.42,
-        "other_processing_ms": 0.08,
-        "total_ms": 55817.26
+        "schema_processing_ms": 1.84,
+        "llm_total_ms": 21184.96,
+        "sql_execution_ms": 0.41,
+        "other_processing_ms": 0.06,
+        "total_ms": 21187.27
       }
     },
     {
@@ -374,20 +374,20 @@
         }
       ],
       "passed": true,
-      "generated_sql": "SELECT COUNT(*) AS 未支付订单数 FROM orders WHERE paid_at IS NULL;",
+      "generated_sql": "SELECT COUNT(*) AS unpaid_order_count FROM orders WHERE paid_at IS NULL;",
       "actual_rows": [
         {
-          "未支付订单数": 55
+          "unpaid_order_count": 55
         }
       ],
       "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 4.67,
-        "llm_total_ms": 23938.82,
+        "schema_processing_ms": 1.71,
+        "llm_total_ms": 9267.24,
         "sql_execution_ms": 0.43,
-        "other_processing_ms": 0.08,
-        "total_ms": 23944.0
+        "other_processing_ms": 0.06,
+        "total_ms": 9269.44
       }
     },
     {
@@ -419,37 +419,37 @@
         }
       ],
       "passed": true,
-      "generated_sql": "SELECT regions.name AS region, COUNT(customers.id) AS customer_count FROM customers JOIN regions ON customers.region_id = regions.id GROUP BY regions.name ORDER BY customer_count DESC",
+      "generated_sql": "SELECT r.name AS 地区名称, COUNT(c.id) AS 客户数量 FROM customers c JOIN regions r ON c.region_id = r.id GROUP BY r.id, r.name ORDER BY 客户数量 DESC, r.name ASC",
       "actual_rows": [
         {
-          "region": "西南",
-          "customer_count": 10
+          "地区名称": "东北",
+          "客户数量": 10
         },
         {
-          "region": "华南",
-          "customer_count": 10
+          "地区名称": "华东",
+          "客户数量": 10
         },
         {
-          "region": "华北",
-          "customer_count": 10
+          "地区名称": "华北",
+          "客户数量": 10
         },
         {
-          "region": "华东",
-          "customer_count": 10
+          "地区名称": "华南",
+          "客户数量": 10
         },
         {
-          "region": "东北",
-          "customer_count": 10
+          "地区名称": "西南",
+          "客户数量": 10
         }
       ],
       "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 2.06,
-        "llm_total_ms": 34074.42,
-        "sql_execution_ms": 0.47,
-        "other_processing_ms": 0.08,
-        "total_ms": 34077.03
+        "schema_processing_ms": 3.66,
+        "llm_total_ms": 5188.21,
+        "sql_execution_ms": 0.48,
+        "other_processing_ms": 0.06,
+        "total_ms": 5192.41
       }
     },
     {
@@ -476,38 +476,34 @@
           "product_count": 2
         }
       ],
-      "passed": false,
-      "generated_sql": "SELECT categories.id, categories.name, COUNT(DISTINCT products.id) AS 商品数量 FROM products JOIN categories ON products.category_id = categories.id GROUP BY categories.id",
+      "passed": true,
+      "generated_sql": "SELECT c.name AS 商品分类, COUNT(p.id) AS 商品数量\nFROM categories c\nLEFT JOIN products p ON c.id = p.category_id\nGROUP BY c.id, c.name\nORDER BY c.name;",
       "actual_rows": [
         {
-          "id": 1,
-          "name": "数码产品",
+          "商品分类": "办公用品",
           "商品数量": 2
         },
         {
-          "id": 2,
-          "name": "办公用品",
+          "商品分类": "家居生活",
           "商品数量": 2
         },
         {
-          "id": 3,
-          "name": "家居生活",
+          "商品分类": "数码产品",
           "商品数量": 2
         },
         {
-          "id": 4,
-          "name": "运动户外",
+          "商品分类": "运动户外",
           "商品数量": 2
         }
       ],
       "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 4.63,
-        "llm_total_ms": 64293.32,
-        "sql_execution_ms": 0.46,
-        "other_processing_ms": 0.15,
-        "total_ms": 64298.56
+        "schema_processing_ms": 1.75,
+        "llm_total_ms": 3254.75,
+        "sql_execution_ms": 0.49,
+        "other_processing_ms": 0.06,
+        "total_ms": 3257.05
       }
     },
     {
@@ -535,33 +531,33 @@
         }
       ],
       "passed": true,
-      "generated_sql": "SELECT categories.name, ROUND(AVG(products.price), 2) FROM products JOIN categories ON products.category_id = categories.id GROUP BY categories.id ORDER BY categories.name;",
+      "generated_sql": "SELECT c.name AS 商品分类名称, ROUND(AVG(p.price), 2) AS 平均商品价格\nFROM products p\nJOIN categories c ON p.category_id = c.id\nGROUP BY c.id, c.name;",
       "actual_rows": [
         {
-          "name": "办公用品",
-          "ROUND(AVG(products.price), 2)": 714.0
+          "商品分类名称": "数码产品",
+          "平均商品价格": 379.0
         },
         {
-          "name": "家居生活",
-          "ROUND(AVG(products.price), 2)": 169.0
+          "商品分类名称": "办公用品",
+          "平均商品价格": 714.0
         },
         {
-          "name": "数码产品",
-          "ROUND(AVG(products.price), 2)": 379.0
+          "商品分类名称": "家居生活",
+          "平均商品价格": 169.0
         },
         {
-          "name": "运动户外",
-          "ROUND(AVG(products.price), 2)": 529.0
+          "商品分类名称": "运动户外",
+          "平均商品价格": 529.0
         }
       ],
       "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 1.73,
-        "llm_total_ms": 9233.03,
-        "sql_execution_ms": 0.54,
-        "other_processing_ms": 0.1,
-        "total_ms": 9235.4
+        "schema_processing_ms": 3.36,
+        "llm_total_ms": 7447.24,
+        "sql_execution_ms": 0.45,
+        "other_processing_ms": 0.05,
+        "total_ms": 7451.1
       }
     },
     {
@@ -576,20 +572,20 @@
         }
       ],
       "passed": true,
-      "generated_sql": "SELECT SUM(order_items.quantity * order_items.unit_price) AS 总销售额 FROM orders JOIN order_items ON orders.id = order_items.order_id WHERE orders.status = 'paid';",
+      "generated_sql": "SELECT ROUND(SUM(oi.quantity * oi.unit_price), 2) AS total_sales\nFROM orders o\nJOIN order_items oi ON o.id = oi.order_id\nWHERE o.status = 'paid';",
       "actual_rows": [
         {
-          "总销售额": 770855
+          "total_sales": 770855.0
         }
       ],
       "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 1.88,
-        "llm_total_ms": 123027.82,
-        "sql_execution_ms": 0.53,
-        "other_processing_ms": 0.08,
-        "total_ms": 123030.31
+        "schema_processing_ms": 2.13,
+        "llm_total_ms": 10388.47,
+        "sql_execution_ms": 0.52,
+        "other_processing_ms": 0.05,
+        "total_ms": 10391.17
       }
     },
     {
@@ -604,20 +600,20 @@
         }
       ],
       "passed": true,
-      "generated_sql": "SELECT ROUND(COUNT(CASE WHEN orders.status = 'cancelled' THEN 1 END) * 100.0 / COUNT(*), 2) AS 订单取消率 FROM orders;",
+      "generated_sql": "SELECT ROUND(COUNT(CASE WHEN status = 'cancelled' THEN 1 END) * 100.0 / COUNT(*), 2) AS cancellation_rate FROM orders",
       "actual_rows": [
         {
-          "订单取消率": 8.5
+          "cancellation_rate": 8.5
         }
       ],
       "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 1.96,
-        "llm_total_ms": 60341.98,
-        "sql_execution_ms": 0.45,
-        "other_processing_ms": 0.1,
-        "total_ms": 60344.49
+        "schema_processing_ms": 1.64,
+        "llm_total_ms": 5243.03,
+        "sql_execution_ms": 0.43,
+        "other_processing_ms": 0.05,
+        "total_ms": 5245.15
       }
     },
     {
@@ -641,29 +637,29 @@
         }
       ],
       "passed": true,
-      "generated_sql": "SELECT orders.status, SUM(order_items.quantity * order_items.unit_price) AS 商品总金额 FROM orders JOIN order_items ON orders.id = order_items.order_id GROUP BY orders.status",
+      "generated_sql": "SELECT o.status, ROUND(SUM(oi.quantity * oi.unit_price), 2) AS total_amount FROM orders o JOIN order_items oi ON o.id = oi.order_id GROUP BY o.status ORDER BY o.status",
       "actual_rows": [
         {
           "status": "cancelled",
-          "商品总金额": 82996
+          "total_amount": 82996.0
         },
         {
           "status": "paid",
-          "商品总金额": 770855
+          "total_amount": 770855.0
         },
         {
           "status": "pending",
-          "商品总金额": 54343
+          "total_amount": 54343.0
         }
       ],
       "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 1.88,
-        "llm_total_ms": 64811.77,
+        "schema_processing_ms": 1.63,
+        "llm_total_ms": 3566.67,
         "sql_execution_ms": 0.69,
-        "other_processing_ms": 0.09,
-        "total_ms": 64814.43
+        "other_processing_ms": 0.06,
+        "total_ms": 3569.05
       }
     },
     {
@@ -678,20 +674,20 @@
         }
       ],
       "passed": true,
-      "generated_sql": "SELECT ROUND(AVG(order_items_count), 2) FROM (SELECT COUNT(DISTINCT product_id) AS order_items_count FROM order_items GROUP BY order_id)",
+      "generated_sql": "SELECT ROUND(AVG(product_count), 2) AS avg_product_count_per_order FROM (SELECT o.id, COUNT(DISTINCT oi.product_id) AS product_count FROM orders o JOIN order_items oi ON o.id = oi.order_id GROUP BY o.id) AS order_product_counts;",
       "actual_rows": [
         {
-          "ROUND(AVG(order_items_count), 2)": 2.03
+          "avg_product_count_per_order": 2.03
         }
       ],
       "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 1.94,
-        "llm_total_ms": 16272.8,
-        "sql_execution_ms": 0.77,
-        "other_processing_ms": 0.08,
-        "total_ms": 16275.59
+        "schema_processing_ms": 1.78,
+        "llm_total_ms": 6087.23,
+        "sql_execution_ms": 0.84,
+        "other_processing_ms": 0.06,
+        "total_ms": 6089.91
       }
     },
     {
@@ -706,20 +702,20 @@
         }
       ],
       "passed": true,
-      "generated_sql": "SELECT ROUND(AVG(order_items.quantity), 2) FROM order_items",
+      "generated_sql": "SELECT ROUND(AVG(quantity), 2) AS avg_quantity_per_item FROM order_items;",
       "actual_rows": [
         {
-          "ROUND(AVG(order_items.quantity), 2)": 2.51
+          "avg_quantity_per_item": 2.51
         }
       ],
       "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 1.94,
-        "llm_total_ms": 9209.09,
+        "schema_processing_ms": 3.86,
+        "llm_total_ms": 2442.31,
         "sql_execution_ms": 0.43,
-        "other_processing_ms": 0.08,
-        "total_ms": 9211.54
+        "other_processing_ms": 0.05,
+        "total_ms": 2446.65
       }
     },
     {
@@ -743,7 +739,7 @@
         }
       ],
       "passed": true,
-      "generated_sql": "SELECT products.name, products.price FROM products WHERE products.price > (SELECT ROUND(AVG(price), 2) FROM products)",
+      "generated_sql": "SELECT p.name, p.price FROM products p WHERE p.price > (SELECT AVG(price) FROM products);",
       "actual_rows": [
         {
           "name": "机械键盘",
@@ -761,11 +757,11 @@
       "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 1.71,
-        "llm_total_ms": 57693.94,
+        "schema_processing_ms": 1.68,
+        "llm_total_ms": 33948.7,
         "sql_execution_ms": 0.43,
-        "other_processing_ms": 0.08,
-        "total_ms": 57696.16
+        "other_processing_ms": 0.04,
+        "total_ms": 33950.85
       }
     },
     {
@@ -796,8 +792,39 @@
           "registered_customers": 10
         }
       ],
-      "passed": false,
-      "error": "LLMResponseError: 模型服务请求超时，已达到最大重试次数。"
+      "passed": true,
+      "generated_sql": "SELECT r.name AS region_name, COUNT(c.id) AS new_customer_count\nFROM customers c\nJOIN regions r ON c.region_id = r.id\nGROUP BY r.id, r.name\nORDER BY r.name;",
+      "actual_rows": [
+        {
+          "region_name": "东北",
+          "new_customer_count": 10
+        },
+        {
+          "region_name": "华东",
+          "new_customer_count": 10
+        },
+        {
+          "region_name": "华北",
+          "new_customer_count": 10
+        },
+        {
+          "region_name": "华南",
+          "new_customer_count": 10
+        },
+        {
+          "region_name": "西南",
+          "new_customer_count": 10
+        }
+      ],
+      "was_review_corrected": false,
+      "was_repaired": false,
+      "timings": {
+        "schema_processing_ms": 1.78,
+        "llm_total_ms": 10545.61,
+        "sql_execution_ms": 0.48,
+        "other_processing_ms": 0.05,
+        "total_ms": 10547.92
+      }
     },
     {
       "id": 21,
@@ -827,8 +854,39 @@
           "sales_amount": 130674.0
         }
       ],
-      "passed": false,
-      "error": "SQLExecutionError: SQL 执行失败，且已达到自动修复次数限制。"
+      "passed": true,
+      "generated_sql": "SELECT r.name AS region_name, ROUND(SUM(oi.quantity * oi.unit_price), 2) AS total_sales FROM orders o JOIN customers c ON o.customer_id = c.id JOIN regions r ON c.region_id = r.id JOIN order_items oi ON o.id = oi.order_id WHERE o.status = 'paid' GROUP BY r.id, r.name ORDER BY total_sales DESC",
+      "actual_rows": [
+        {
+          "region_name": "东北",
+          "total_sales": 196001.0
+        },
+        {
+          "region_name": "华东",
+          "total_sales": 154493.0
+        },
+        {
+          "region_name": "华南",
+          "total_sales": 154360.0
+        },
+        {
+          "region_name": "西南",
+          "total_sales": 135327.0
+        },
+        {
+          "region_name": "华北",
+          "total_sales": 130674.0
+        }
+      ],
+      "was_review_corrected": false,
+      "was_repaired": false,
+      "timings": {
+        "schema_processing_ms": 4.03,
+        "llm_total_ms": 9387.15,
+        "sql_execution_ms": 0.83,
+        "other_processing_ms": 0.06,
+        "total_ms": 9392.07
+      }
     },
     {
       "id": 22,
@@ -855,33 +913,33 @@
         }
       ],
       "passed": true,
-      "generated_sql": "SELECT categories.name AS category_name, ROUND(SUM(order_items.quantity * order_items.unit_price), 2) AS paid_sales_amount FROM categories JOIN products ON categories.id = products.category_id JOIN order_items ON order_items.product_id = products.id JOIN orders ON orders.id = order_items.order_id WHERE orders.status = 'paid' GROUP BY categories.name",
+      "generated_sql": "SELECT c.name AS 商品分类, ROUND(SUM(oi.quantity * oi.unit_price), 2) AS 已支付销售额 FROM orders o JOIN order_items oi ON o.id = oi.order_id JOIN products p ON oi.product_id = p.id JOIN categories c ON p.category_id = c.id WHERE o.status = 'paid' GROUP BY c.id, c.name ORDER BY c.name",
       "actual_rows": [
         {
-          "category_name": "办公用品",
-          "paid_sales_amount": 315726.0
+          "商品分类": "办公用品",
+          "已支付销售额": 315726.0
         },
         {
-          "category_name": "家居生活",
-          "paid_sales_amount": 83910.0
+          "商品分类": "家居生活",
+          "已支付销售额": 83910.0
         },
         {
-          "category_name": "数码产品",
-          "paid_sales_amount": 150244.0
+          "商品分类": "数码产品",
+          "已支付销售额": 150244.0
         },
         {
-          "category_name": "运动户外",
-          "paid_sales_amount": 220975.0
+          "商品分类": "运动户外",
+          "已支付销售额": 220975.0
         }
       ],
-      "was_review_corrected": true,
+      "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 2.42,
-        "llm_total_ms": 75104.09,
-        "sql_execution_ms": 0.95,
-        "other_processing_ms": 0.14,
-        "total_ms": 75107.6
+        "schema_processing_ms": 1.66,
+        "llm_total_ms": 15064.02,
+        "sql_execution_ms": 0.84,
+        "other_processing_ms": 0.07,
+        "total_ms": 15066.59
       }
     },
     {
@@ -924,58 +982,50 @@
           "quantity_sold": 197
         }
       ],
-      "passed": false,
-      "generated_sql": "SELECT products.id, products.name, SUM(order_items.quantity) AS 销售数量 FROM products JOIN order_items ON products.id = order_items.product_id JOIN orders ON order_items.order_id = orders.id WHERE orders.status = 'paid' GROUP BY products.id ORDER BY 销售数量 DESC;",
+      "passed": true,
+      "generated_sql": "SELECT p.name, SUM(oi.quantity) AS total_sold\nFROM order_items oi\nJOIN orders o ON oi.order_id = o.id\nJOIN products p ON oi.product_id = p.id\nWHERE o.status = 'paid'\nGROUP BY p.id, p.name\nORDER BY total_sold DESC, p.name ASC;",
       "actual_rows": [
         {
-          "id": 5,
           "name": "智能台灯",
-          "销售数量": 267
+          "total_sold": 267
         },
         {
-          "id": 7,
           "name": "瑜伽垫",
-          "销售数量": 242
+          "total_sold": 242
         },
         {
-          "id": 4,
           "name": "人体工学椅",
-          "销售数量": 222
+          "total_sold": 222
         },
         {
-          "id": 3,
           "name": "笔记本支架",
-          "销售数量": 212
+          "total_sold": 212
         },
         {
-          "id": 8,
-          "name": "露营帐篷",
-          "销售数量": 203
-        },
-        {
-          "id": 6,
           "name": "保温杯",
-          "销售数量": 203
+          "total_sold": 203
         },
         {
-          "id": 2,
+          "name": "露营帐篷",
+          "total_sold": 203
+        },
+        {
           "name": "机械键盘",
-          "销售数量": 199
+          "total_sold": 199
         },
         {
-          "id": 1,
           "name": "无线耳机",
-          "销售数量": 197
+          "total_sold": 197
         }
       ],
       "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 1.72,
-        "llm_total_ms": 74736.65,
-        "sql_execution_ms": 0.74,
-        "other_processing_ms": 0.1,
-        "total_ms": 74739.21
+        "schema_processing_ms": 1.84,
+        "llm_total_ms": 8152.63,
+        "sql_execution_ms": 0.79,
+        "other_processing_ms": 0.07,
+        "total_ms": 8155.33
       }
     },
     {
@@ -1018,58 +1068,50 @@
           "sales_amount": 20097.0
         }
       ],
-      "passed": false,
-      "generated_sql": "SELECT products.id, products.name, ROUND(SUM(order_items.quantity * order_items.unit_price), 2) AS 销售额 FROM products JOIN order_items ON products.id = order_items.product_id JOIN orders ON order_items.order_id = orders.id WHERE orders.status = 'paid' GROUP BY products.id ORDER BY 销售额 DESC;",
+      "passed": true,
+      "generated_sql": "SELECT p.name, ROUND(SUM(oi.quantity * oi.unit_price), 2) AS sales_amount\nFROM orders o\nJOIN order_items oi ON o.id = oi.order_id\nJOIN products p ON oi.product_id = p.id\nWHERE o.status = 'paid'\nGROUP BY p.id, p.name\nORDER BY sales_amount DESC, p.name;",
       "actual_rows": [
         {
-          "id": 4,
           "name": "人体工学椅",
-          "销售额": 288378.0
+          "sales_amount": 288378.0
         },
         {
-          "id": 8,
           "name": "露营帐篷",
-          "销售额": 182497.0
+          "sales_amount": 182497.0
         },
         {
-          "id": 2,
           "name": "机械键盘",
-          "销售额": 91341.0
+          "sales_amount": 91341.0
         },
         {
-          "id": 5,
           "name": "智能台灯",
-          "销售额": 63813.0
+          "sales_amount": 63813.0
         },
         {
-          "id": 1,
           "name": "无线耳机",
-          "销售额": 58903.0
+          "sales_amount": 58903.0
         },
         {
-          "id": 7,
           "name": "瑜伽垫",
-          "销售额": 38478.0
+          "sales_amount": 38478.0
         },
         {
-          "id": 3,
           "name": "笔记本支架",
-          "销售额": 27348.0
+          "sales_amount": 27348.0
         },
         {
-          "id": 6,
           "name": "保温杯",
-          "销售额": 20097.0
+          "sales_amount": 20097.0
         }
       ],
       "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 4.17,
-        "llm_total_ms": 44565.46,
-        "sql_execution_ms": 0.89,
-        "other_processing_ms": 0.1,
-        "total_ms": 44570.62
+        "schema_processing_ms": 1.68,
+        "llm_total_ms": 5024.09,
+        "sql_execution_ms": 0.84,
+        "other_processing_ms": 0.06,
+        "total_ms": 5026.67
       }
     },
     {
@@ -1100,43 +1142,38 @@
           "paid_amount": 27970.0
         }
       ],
-      "passed": false,
-      "generated_sql": "SELECT customers.id, customers.name, ROUND(SUM(order_items.quantity * order_items.unit_price), 2) AS total_consumption_amount FROM orders JOIN order_items ON orders.id = order_items.order_id JOIN customers ON orders.customer_id = customers.id WHERE orders.status = 'paid' GROUP BY customers.id ORDER BY total_consumption_amount DESC LIMIT 5",
+      "passed": true,
+      "generated_sql": "SELECT c.name, ROUND(SUM(oi.quantity * oi.unit_price), 2) AS total_spent FROM customers c JOIN orders o ON c.id = o.customer_id JOIN order_items oi ON o.id = oi.order_id WHERE o.status = 'paid' GROUP BY c.id, c.name ORDER BY total_spent DESC, c.name ASC LIMIT 5",
       "actual_rows": [
         {
-          "id": 45,
           "name": "客户045",
-          "total_consumption_amount": 31189.0
+          "total_spent": 31189.0
         },
         {
-          "id": 46,
           "name": "客户046",
-          "total_consumption_amount": 29669.0
+          "total_spent": 29669.0
         },
         {
-          "id": 37,
           "name": "客户037",
-          "total_consumption_amount": 28669.0
+          "total_spent": 28669.0
         },
         {
-          "id": 26,
           "name": "客户026",
-          "total_consumption_amount": 28066.0
+          "total_spent": 28066.0
         },
         {
-          "id": 25,
           "name": "客户025",
-          "total_consumption_amount": 27970.0
+          "total_spent": 27970.0
         }
       ],
       "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 1.99,
-        "llm_total_ms": 93988.55,
-        "sql_execution_ms": 0.84,
-        "other_processing_ms": 0.09,
-        "total_ms": 93991.47
+        "schema_processing_ms": 1.88,
+        "llm_total_ms": 32168.41,
+        "sql_execution_ms": 0.86,
+        "other_processing_ms": 0.07,
+        "total_ms": 32171.22
       }
     },
     {
@@ -1347,268 +1384,218 @@
           "order_count": 2
         }
       ],
-      "passed": false,
-      "generated_sql": "SELECT customers.id, customers.name, COUNT(orders.id) AS 订单数量 FROM customers LEFT JOIN orders ON customers.id = orders.customer_id GROUP BY customers.id",
+      "passed": true,
+      "generated_sql": "SELECT c.name AS 客户名称, COUNT(o.id) AS 订单数量 FROM customers c LEFT JOIN orders o ON c.id = o.customer_id GROUP BY c.id, c.name ORDER BY c.name;",
       "actual_rows": [
         {
-          "id": 1,
-          "name": "客户001",
+          "客户名称": "客户001",
           "订单数量": 9
         },
         {
-          "id": 2,
-          "name": "客户002",
+          "客户名称": "客户002",
           "订单数量": 7
         },
         {
-          "id": 3,
-          "name": "客户003",
+          "客户名称": "客户003",
           "订单数量": 8
         },
         {
-          "id": 4,
-          "name": "客户004",
+          "客户名称": "客户004",
           "订单数量": 6
         },
         {
-          "id": 5,
-          "name": "客户005",
+          "客户名称": "客户005",
           "订单数量": 5
         },
         {
-          "id": 6,
-          "name": "客户006",
+          "客户名称": "客户006",
           "订单数量": 7
         },
         {
-          "id": 7,
-          "name": "客户007",
+          "客户名称": "客户007",
           "订单数量": 9
         },
         {
-          "id": 8,
-          "name": "客户008",
+          "客户名称": "客户008",
           "订单数量": 9
         },
         {
-          "id": 9,
-          "name": "客户009",
+          "客户名称": "客户009",
           "订单数量": 9
         },
         {
-          "id": 10,
-          "name": "客户010",
+          "客户名称": "客户010",
           "订单数量": 4
         },
         {
-          "id": 11,
-          "name": "客户011",
+          "客户名称": "客户011",
           "订单数量": 8
         },
         {
-          "id": 12,
-          "name": "客户012",
+          "客户名称": "客户012",
           "订单数量": 7
         },
         {
-          "id": 13,
-          "name": "客户013",
+          "客户名称": "客户013",
           "订单数量": 8
         },
         {
-          "id": 14,
-          "name": "客户014",
+          "客户名称": "客户014",
           "订单数量": 10
         },
         {
-          "id": 15,
-          "name": "客户015",
+          "客户名称": "客户015",
           "订单数量": 11
         },
         {
-          "id": 16,
-          "name": "客户016",
+          "客户名称": "客户016",
           "订单数量": 8
         },
         {
-          "id": 17,
-          "name": "客户017",
+          "客户名称": "客户017",
           "订单数量": 11
         },
         {
-          "id": 18,
-          "name": "客户018",
+          "客户名称": "客户018",
           "订单数量": 6
         },
         {
-          "id": 19,
-          "name": "客户019",
+          "客户名称": "客户019",
           "订单数量": 7
         },
         {
-          "id": 20,
-          "name": "客户020",
+          "客户名称": "客户020",
           "订单数量": 12
         },
         {
-          "id": 21,
-          "name": "客户021",
+          "客户名称": "客户021",
           "订单数量": 3
         },
         {
-          "id": 22,
-          "name": "客户022",
+          "客户名称": "客户022",
           "订单数量": 11
         },
         {
-          "id": 23,
-          "name": "客户023",
+          "客户名称": "客户023",
           "订单数量": 6
         },
         {
-          "id": 24,
-          "name": "客户024",
+          "客户名称": "客户024",
           "订单数量": 9
         },
         {
-          "id": 25,
-          "name": "客户025",
+          "客户名称": "客户025",
           "订单数量": 11
         },
         {
-          "id": 26,
-          "name": "客户026",
+          "客户名称": "客户026",
           "订单数量": 8
         },
         {
-          "id": 27,
-          "name": "客户027",
+          "客户名称": "客户027",
           "订单数量": 7
         },
         {
-          "id": 28,
-          "name": "客户028",
+          "客户名称": "客户028",
           "订单数量": 3
         },
         {
-          "id": 29,
-          "name": "客户029",
+          "客户名称": "客户029",
           "订单数量": 8
         },
         {
-          "id": 30,
-          "name": "客户030",
+          "客户名称": "客户030",
           "订单数量": 7
         },
         {
-          "id": 31,
-          "name": "客户031",
+          "客户名称": "客户031",
           "订单数量": 9
         },
         {
-          "id": 32,
-          "name": "客户032",
+          "客户名称": "客户032",
           "订单数量": 10
         },
         {
-          "id": 33,
-          "name": "客户033",
+          "客户名称": "客户033",
           "订单数量": 7
         },
         {
-          "id": 34,
-          "name": "客户034",
+          "客户名称": "客户034",
           "订单数量": 6
         },
         {
-          "id": 35,
-          "name": "客户035",
+          "客户名称": "客户035",
           "订单数量": 8
         },
         {
-          "id": 36,
-          "name": "客户036",
+          "客户名称": "客户036",
           "订单数量": 2
         },
         {
-          "id": 37,
-          "name": "客户037",
+          "客户名称": "客户037",
           "订单数量": 14
         },
         {
-          "id": 38,
-          "name": "客户038",
+          "客户名称": "客户038",
           "订单数量": 7
         },
         {
-          "id": 39,
-          "name": "客户039",
+          "客户名称": "客户039",
           "订单数量": 6
         },
         {
-          "id": 40,
-          "name": "客户040",
+          "客户名称": "客户040",
           "订单数量": 7
         },
         {
-          "id": 41,
-          "name": "客户041",
+          "客户名称": "客户041",
           "订单数量": 6
         },
         {
-          "id": 42,
-          "name": "客户042",
+          "客户名称": "客户042",
           "订单数量": 6
         },
         {
-          "id": 43,
-          "name": "客户043",
+          "客户名称": "客户043",
           "订单数量": 8
         },
         {
-          "id": 44,
-          "name": "客户044",
+          "客户名称": "客户044",
           "订单数量": 5
         },
         {
-          "id": 45,
-          "name": "客户045",
+          "客户名称": "客户045",
           "订单数量": 16
         },
         {
-          "id": 46,
-          "name": "客户046",
+          "客户名称": "客户046",
           "订单数量": 14
         },
         {
-          "id": 47,
-          "name": "客户047",
+          "客户名称": "客户047",
           "订单数量": 8
         },
         {
-          "id": 48,
-          "name": "客户048",
+          "客户名称": "客户048",
           "订单数量": 11
         },
         {
-          "id": 49,
-          "name": "客户049",
+          "客户名称": "客户049",
           "订单数量": 7
         },
         {
-          "id": 50,
-          "name": "客户050",
+          "客户名称": "客户050",
           "订单数量": 9
         }
       ],
       "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 2.03,
-        "llm_total_ms": 33509.48,
-        "sql_execution_ms": 0.73,
-        "other_processing_ms": 0.09,
-        "total_ms": 33512.33
+        "schema_processing_ms": 1.66,
+        "llm_total_ms": 2856.89,
+        "sql_execution_ms": 0.76,
+        "other_processing_ms": 0.05,
+        "total_ms": 2859.36
       }
     },
     {
@@ -1619,16 +1606,16 @@
       "expected_sql": "SELECT c.name AS customer_name FROM customers c LEFT JOIN orders o ON o.customer_id = c.id WHERE o.id IS NULL ORDER BY customer_name",
       "expected_rows": [],
       "passed": true,
-      "generated_sql": "SELECT customers.name FROM customers LEFT JOIN orders ON customers.id = orders.customer_id WHERE orders.id IS NULL",
+      "generated_sql": "SELECT c.name FROM customers c LEFT JOIN orders o ON c.id = o.customer_id WHERE o.id IS NULL;",
       "actual_rows": [],
       "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 2.55,
-        "llm_total_ms": 94283.25,
-        "sql_execution_ms": 0.7,
-        "other_processing_ms": 0.1,
-        "total_ms": 94286.6
+        "schema_processing_ms": 1.84,
+        "llm_total_ms": 24078.57,
+        "sql_execution_ms": 0.6,
+        "other_processing_ms": 0.07,
+        "total_ms": 24081.08
       }
     },
     {
@@ -1639,16 +1626,16 @@
       "expected_sql": "SELECT p.name AS product_name FROM products p LEFT JOIN order_items oi ON oi.product_id = p.id WHERE oi.id IS NULL ORDER BY product_name",
       "expected_rows": [],
       "passed": true,
-      "generated_sql": "SELECT products.id, products.name FROM products LEFT JOIN order_items ON products.id = order_items.product_id WHERE order_items.product_id IS NULL",
+      "generated_sql": "SELECT p.id, p.name FROM products p LEFT JOIN order_items oi ON p.id = oi.product_id WHERE oi.product_id IS NULL;",
       "actual_rows": [],
       "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 5.58,
-        "llm_total_ms": 24494.85,
-        "sql_execution_ms": 0.77,
-        "other_processing_ms": 0.09,
-        "total_ms": 24501.29
+        "schema_processing_ms": 1.69,
+        "llm_total_ms": 1851.31,
+        "sql_execution_ms": 0.75,
+        "other_processing_ms": 0.05,
+        "total_ms": 1853.8
       }
     },
     {
@@ -1664,21 +1651,21 @@
         }
       ],
       "passed": false,
-      "generated_sql": "SELECT orders.id, ROUND(order_items.quantity * order_items.unit_price, 2) AS 金额 FROM orders JOIN order_items ON orders.id = order_items.order_id WHERE orders.status = 'paid' GROUP BY orders.id ORDER BY 金额 DESC LIMIT 1",
+      "generated_sql": "SELECT o.id AS 订单ID, ROUND(SUM(oi.quantity * oi.unit_price), 2) AS 金额 FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE o.status = 'paid' GROUP BY o.id ORDER BY 金额 DESC LIMIT 1",
       "actual_rows": [
         {
-          "id": 322,
-          "金额": 5196.0
+          "订单ID": 68,
+          "金额": 7630.0
         }
       ],
-      "was_review_corrected": true,
+      "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 1.71,
-        "llm_total_ms": 18182.85,
-        "sql_execution_ms": 0.79,
-        "other_processing_ms": 0.12,
-        "total_ms": 18185.47
+        "schema_processing_ms": 1.69,
+        "llm_total_ms": 18092.09,
+        "sql_execution_ms": 0.82,
+        "other_processing_ms": 0.06,
+        "total_ms": 18094.66
       }
     },
     {
@@ -1709,38 +1696,38 @@
           "avg_order_amount": 2074.19
         }
       ],
-      "passed": false,
-      "generated_sql": "SELECT regions.name AS region, ROUND(AVG(orders.id), 2) AS avg_order_amount FROM orders JOIN customers ON orders.customer_id = customers.id JOIN regions ON customers.region_id = regions.id WHERE orders.status = 'paid' GROUP BY regions.name;",
+      "passed": true,
+      "generated_sql": "SELECT r.name AS region_name, ROUND(AVG(sub.total_amount), 2) AS avg_order_amount FROM regions r LEFT JOIN customers c ON c.region_id = r.id LEFT JOIN orders o ON o.customer_id = c.id AND o.status = 'paid' LEFT JOIN (SELECT order_id, SUM(quantity * unit_price) AS total_amount FROM order_items GROUP BY order_id) sub ON sub.order_id = o.id GROUP BY r.id, r.name ORDER BY r.name;",
       "actual_rows": [
         {
-          "region": "东北",
-          "avg_order_amount": 212.39
+          "region_name": "东北",
+          "avg_order_amount": 2481.03
         },
         {
-          "region": "华东",
-          "avg_order_amount": 209.99
+          "region_name": "华东",
+          "avg_order_amount": 2305.87
         },
         {
-          "region": "华北",
-          "avg_order_amount": 208.44
+          "region_name": "华北",
+          "avg_order_amount": 2074.19
         },
         {
-          "region": "华南",
-          "avg_order_amount": 179.62
+          "region_name": "华南",
+          "avg_order_amount": 2085.95
         },
         {
-          "region": "西南",
-          "avg_order_amount": 182.37
+          "region_name": "西南",
+          "avg_order_amount": 2182.69
         }
       ],
-      "was_review_corrected": true,
+      "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 4.81,
-        "llm_total_ms": 44109.03,
-        "sql_execution_ms": 0.57,
-        "other_processing_ms": 0.12,
-        "total_ms": 44114.53
+        "schema_processing_ms": 1.7,
+        "llm_total_ms": 13661.13,
+        "sql_execution_ms": 1.25,
+        "other_processing_ms": 0.08,
+        "total_ms": 13664.16
       }
     },
     {
@@ -1760,25 +1747,25 @@
         }
       ],
       "passed": true,
-      "generated_sql": "SELECT strftime('%Y', created_at) AS year, SUM(order_items.quantity * order_items.unit_price) AS paid_sales_amount FROM orders JOIN order_items ON orders.id = order_items.order_id WHERE orders.status = 'paid' AND strftime('%Y', created_at) IN ('2024', '2025') GROUP BY year",
+      "generated_sql": "SELECT strftime('%Y', o.created_at) AS year, ROUND(SUM(oi.quantity * oi.unit_price), 2) AS paid_sales_amount FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE o.status = 'paid' AND strftime('%Y', o.created_at) IN ('2024', '2025') GROUP BY strftime('%Y', o.created_at) ORDER BY year;",
       "actual_rows": [
         {
           "year": "2024",
-          "paid_sales_amount": 377979
+          "paid_sales_amount": 377979.0
         },
         {
           "year": "2025",
-          "paid_sales_amount": 392876
+          "paid_sales_amount": 392876.0
         }
       ],
       "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 1.56,
-        "llm_total_ms": 44089.77,
-        "sql_execution_ms": 1.23,
-        "other_processing_ms": 0.1,
-        "total_ms": 44092.66
+        "schema_processing_ms": 3.72,
+        "llm_total_ms": 14573.35,
+        "sql_execution_ms": 1.09,
+        "other_processing_ms": 0.06,
+        "total_ms": 14578.22
       }
     },
     {
@@ -1838,65 +1825,65 @@
         }
       ],
       "passed": true,
-      "generated_sql": "SELECT strftime('%Y-%m', orders.created_at) AS month, SUM(order_items.quantity * order_items.unit_price) AS paid_sales_amount FROM orders JOIN order_items ON orders.id = order_items.order_id WHERE orders.status = 'paid' AND strftime('%Y', orders.created_at) = '2024' GROUP BY month ORDER BY month;",
+      "generated_sql": "SELECT strftime('%Y-%m', o.created_at) AS month, ROUND(SUM(oi.quantity * oi.unit_price), 2) AS sales FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE o.status = 'paid' AND strftime('%Y', o.created_at) = '2024' GROUP BY strftime('%Y-%m', o.created_at) ORDER BY month",
       "actual_rows": [
         {
           "month": "2024-01",
-          "paid_sales_amount": 47172
+          "sales": 47172.0
         },
         {
           "month": "2024-02",
-          "paid_sales_amount": 36912
+          "sales": 36912.0
         },
         {
           "month": "2024-03",
-          "paid_sales_amount": 22835
+          "sales": 22835.0
         },
         {
           "month": "2024-04",
-          "paid_sales_amount": 28849
+          "sales": 28849.0
         },
         {
           "month": "2024-05",
-          "paid_sales_amount": 30490
+          "sales": 30490.0
         },
         {
           "month": "2024-06",
-          "paid_sales_amount": 34643
+          "sales": 34643.0
         },
         {
           "month": "2024-07",
-          "paid_sales_amount": 25719
+          "sales": 25719.0
         },
         {
           "month": "2024-08",
-          "paid_sales_amount": 31469
+          "sales": 31469.0
         },
         {
           "month": "2024-09",
-          "paid_sales_amount": 29771
+          "sales": 29771.0
         },
         {
           "month": "2024-10",
-          "paid_sales_amount": 22869
+          "sales": 22869.0
         },
         {
           "month": "2024-11",
-          "paid_sales_amount": 29172
+          "sales": 29172.0
         },
         {
           "month": "2024-12",
-          "paid_sales_amount": 38078
+          "sales": 38078.0
         }
       ],
       "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 5.71,
-        "llm_total_ms": 51357.12,
-        "sql_execution_ms": 0.99,
-        "other_processing_ms": 0.1,
-        "total_ms": 51363.92
+        "schema_processing_ms": 1.68,
+        "llm_total_ms": 2882.75,
+        "sql_execution_ms": 0.98,
+        "other_processing_ms": 0.06,
+        "total_ms": 2885.47
       }
     },
     {
@@ -1956,7 +1943,7 @@
         }
       ],
       "passed": true,
-      "generated_sql": "SELECT strftime('%Y-%m', date(orders.created_at)) AS month, COUNT(orders.id) AS order_count FROM orders WHERE strftime('%Y', date(orders.created_at)) = '2025' GROUP BY month;",
+      "generated_sql": "SELECT strftime('%Y-%m', created_at) AS month, COUNT(*) AS order_count FROM orders WHERE strftime('%Y', created_at) = '2025' GROUP BY strftime('%Y-%m', created_at) ORDER BY month",
       "actual_rows": [
         {
           "month": "2025-01",
@@ -2010,11 +1997,11 @@
       "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 2.19,
-        "llm_total_ms": 61104.27,
-        "sql_execution_ms": 0.92,
-        "other_processing_ms": 0.09,
-        "total_ms": 61107.47
+        "schema_processing_ms": 1.65,
+        "llm_total_ms": 2122.9,
+        "sql_execution_ms": 0.7,
+        "other_processing_ms": 0.05,
+        "total_ms": 2125.3
       }
     },
     {
@@ -2029,20 +2016,20 @@
         }
       ],
       "passed": true,
-      "generated_sql": "SELECT ROUND(AVG((julianday(paid_at) - julianday(created_at)) * 24), 2) AS 平均支付耗时 FROM orders WHERE status = 'paid'",
+      "generated_sql": "SELECT ROUND(AVG((julianday(paid_at) - julianday(created_at)) * 24), 2) AS avg_payment_hours FROM orders WHERE status = 'paid' AND paid_at IS NOT NULL",
       "actual_rows": [
         {
-          "平均支付耗时": 23.62
+          "avg_payment_hours": 23.62
         }
       ],
       "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 1.8,
-        "llm_total_ms": 72394.17,
-        "sql_execution_ms": 0.54,
-        "other_processing_ms": 0.08,
-        "total_ms": 72396.59
+        "schema_processing_ms": 3.58,
+        "llm_total_ms": 1979.3,
+        "sql_execution_ms": 0.49,
+        "other_processing_ms": 0.06,
+        "total_ms": 1983.43
       }
     },
     {
@@ -2094,57 +2081,57 @@
         }
       ],
       "passed": true,
-      "generated_sql": "SELECT date(orders.created_at) AS date, ROUND(SUM(order_items.quantity * order_items.unit_price), 2) AS sales_amount FROM orders JOIN order_items ON orders.id = order_items.order_id WHERE orders.status = 'paid' GROUP BY date(orders.created_at) ORDER BY sales_amount DESC LIMIT 10",
+      "generated_sql": "SELECT date(o.created_at) AS order_date, ROUND(SUM(oi.quantity * oi.unit_price), 2) AS total_sales FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE o.status = 'paid' GROUP BY date(o.created_at) ORDER BY total_sales DESC, order_date ASC LIMIT 10",
       "actual_rows": [
         {
-          "date": "2025-10-11",
-          "sales_amount": 12826.0
+          "order_date": "2025-10-11",
+          "total_sales": 12826.0
         },
         {
-          "date": "2025-09-21",
-          "sales_amount": 11736.0
+          "order_date": "2025-09-21",
+          "total_sales": 11736.0
         },
         {
-          "date": "2024-01-23",
-          "sales_amount": 11438.0
+          "order_date": "2024-01-23",
+          "total_sales": 11438.0
         },
         {
-          "date": "2024-11-09",
-          "sales_amount": 10080.0
+          "order_date": "2024-11-09",
+          "total_sales": 10080.0
         },
         {
-          "date": "2025-11-25",
-          "sales_amount": 9687.0
+          "order_date": "2025-11-25",
+          "total_sales": 9687.0
         },
         {
-          "date": "2024-04-21",
-          "sales_amount": 8891.0
+          "order_date": "2024-04-21",
+          "total_sales": 8891.0
         },
         {
-          "date": "2024-01-26",
-          "sales_amount": 8829.0
+          "order_date": "2024-01-26",
+          "total_sales": 8829.0
         },
         {
-          "date": "2025-06-15",
-          "sales_amount": 8675.0
+          "order_date": "2025-06-15",
+          "total_sales": 8675.0
         },
         {
-          "date": "2025-01-30",
-          "sales_amount": 8351.0
+          "order_date": "2025-01-30",
+          "total_sales": 8351.0
         },
         {
-          "date": "2025-05-13",
-          "sales_amount": 8185.0
+          "order_date": "2025-05-13",
+          "total_sales": 8185.0
         }
       ],
       "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 1.98,
-        "llm_total_ms": 84221.36,
-        "sql_execution_ms": 1.07,
-        "other_processing_ms": 0.09,
-        "total_ms": 84224.5
+        "schema_processing_ms": 1.65,
+        "llm_total_ms": 10766.44,
+        "sql_execution_ms": 1.02,
+        "other_processing_ms": 0.07,
+        "total_ms": 10769.18
       }
     },
     {
@@ -2183,47 +2170,8 @@
           "order_count": 63
         }
       ],
-      "passed": true,
-      "generated_sql": "SELECT strftime('%w', created_at) AS week_day, COUNT(*) AS order_count FROM orders GROUP BY week_day",
-      "actual_rows": [
-        {
-          "week_day": "0",
-          "order_count": 51
-        },
-        {
-          "week_day": "1",
-          "order_count": 50
-        },
-        {
-          "week_day": "2",
-          "order_count": 73
-        },
-        {
-          "week_day": "3",
-          "order_count": 44
-        },
-        {
-          "week_day": "4",
-          "order_count": 72
-        },
-        {
-          "week_day": "5",
-          "order_count": 47
-        },
-        {
-          "week_day": "6",
-          "order_count": 63
-        }
-      ],
-      "was_review_corrected": false,
-      "was_repaired": false,
-      "timings": {
-        "schema_processing_ms": 4.95,
-        "llm_total_ms": 29037.56,
-        "sql_execution_ms": 0.61,
-        "other_processing_ms": 0.07,
-        "total_ms": 29043.19
-      }
+      "passed": false,
+      "error": "LLMResponseError: 模型服务请求超时，已达到最大重试次数。"
     },
     {
       "id": 37,
@@ -2282,65 +2230,65 @@
         }
       ],
       "passed": true,
-      "generated_sql": "SELECT strftime('%H', created_at) AS order_creation_hour, COUNT(*) AS order_count FROM orders GROUP BY order_creation_hour ORDER BY order_creation_hour;",
+      "generated_sql": "SELECT strftime('%H', created_at) AS hour, COUNT(*) AS order_count FROM orders GROUP BY strftime('%H', created_at) ORDER BY hour",
       "actual_rows": [
         {
-          "order_creation_hour": "09",
+          "hour": "09",
           "order_count": 41
         },
         {
-          "order_creation_hour": "10",
+          "hour": "10",
           "order_count": 36
         },
         {
-          "order_creation_hour": "11",
+          "hour": "11",
           "order_count": 17
         },
         {
-          "order_creation_hour": "12",
+          "hour": "12",
           "order_count": 31
         },
         {
-          "order_creation_hour": "13",
+          "hour": "13",
           "order_count": 19
         },
         {
-          "order_creation_hour": "14",
+          "hour": "14",
           "order_count": 22
         },
         {
-          "order_creation_hour": "15",
+          "hour": "15",
           "order_count": 34
         },
         {
-          "order_creation_hour": "16",
+          "hour": "16",
           "order_count": 45
         },
         {
-          "order_creation_hour": "17",
+          "hour": "17",
           "order_count": 42
         },
         {
-          "order_creation_hour": "18",
+          "hour": "18",
           "order_count": 30
         },
         {
-          "order_creation_hour": "19",
+          "hour": "19",
           "order_count": 45
         },
         {
-          "order_creation_hour": "20",
+          "hour": "20",
           "order_count": 38
         }
       ],
       "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 2.06,
-        "llm_total_ms": 10310.98,
-        "sql_execution_ms": 0.64,
-        "other_processing_ms": 0.09,
-        "total_ms": 10313.77
+        "schema_processing_ms": 1.73,
+        "llm_total_ms": 6286.54,
+        "sql_execution_ms": 0.65,
+        "other_processing_ms": 0.06,
+        "total_ms": 6288.98
       }
     },
     {
@@ -2371,8 +2319,39 @@
           "sales_amount": 68197.0
         }
       ],
-      "passed": false,
-      "error": "SQLExecutionError: SQL 执行失败，且已达到自动修复次数限制。"
+      "passed": true,
+      "generated_sql": "SELECT r.name AS 地区, ROUND(SUM(oi.quantity * oi.unit_price), 2) AS 已支付销售额 FROM orders o JOIN order_items oi ON o.id = oi.order_id JOIN customers c ON o.customer_id = c.id JOIN regions r ON c.region_id = r.id WHERE o.status = 'paid' AND strftime('%Y', o.created_at) = '2024' GROUP BY r.id, r.name ORDER BY r.name",
+      "actual_rows": [
+        {
+          "地区": "东北",
+          "已支付销售额": 85258.0
+        },
+        {
+          "地区": "华东",
+          "已支付销售额": 78809.0
+        },
+        {
+          "地区": "华北",
+          "已支付销售额": 69554.0
+        },
+        {
+          "地区": "华南",
+          "已支付销售额": 76161.0
+        },
+        {
+          "地区": "西南",
+          "已支付销售额": 68197.0
+        }
+      ],
+      "was_review_corrected": false,
+      "was_repaired": false,
+      "timings": {
+        "schema_processing_ms": 3.41,
+        "llm_total_ms": 5310.82,
+        "sql_execution_ms": 0.92,
+        "other_processing_ms": 0.08,
+        "total_ms": 5315.23
+      }
     },
     {
       "id": 39,
@@ -2399,33 +2378,33 @@
         }
       ],
       "passed": true,
-      "generated_sql": "SELECT categories.name AS 分类名称, ROUND(SUM(order_items.quantity * order_items.unit_price), 2) AS 已支付销售额 FROM orders JOIN order_items ON orders.id = order_items.order_id JOIN products ON order_items.product_id = products.id JOIN categories ON products.category_id = categories.id WHERE orders.status = 'paid' AND strftime('%Y', orders.created_at) = '2025' GROUP BY categories.name ORDER BY SUM(order_items.quantity * order_items.unit_price) DESC;",
+      "generated_sql": "SELECT c.name AS 商品分类, ROUND(SUM(oi.quantity * oi.unit_price), 2) AS 已支付销售额 FROM orders o JOIN order_items oi ON o.id = oi.order_id JOIN products p ON oi.product_id = p.id JOIN categories c ON p.category_id = c.id WHERE o.status = 'paid' AND strftime('%Y', o.created_at) = '2025' GROUP BY c.id, c.name ORDER BY c.name;",
       "actual_rows": [
         {
-          "分类名称": "办公用品",
+          "商品分类": "办公用品",
           "已支付销售额": 165261.0
         },
         {
-          "分类名称": "运动户外",
-          "已支付销售额": 110148.0
+          "商品分类": "家居生活",
+          "已支付销售额": 38976.0
         },
         {
-          "分类名称": "数码产品",
+          "商品分类": "数码产品",
           "已支付销售额": 78491.0
         },
         {
-          "分类名称": "家居生活",
-          "已支付销售额": 38976.0
+          "商品分类": "运动户外",
+          "已支付销售额": 110148.0
         }
       ],
-      "was_review_corrected": true,
+      "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 4.04,
-        "llm_total_ms": 20495.12,
-        "sql_execution_ms": 1.03,
-        "other_processing_ms": 0.2,
-        "total_ms": 20500.39
+        "schema_processing_ms": 1.67,
+        "llm_total_ms": 52054.37,
+        "sql_execution_ms": 0.92,
+        "other_processing_ms": 0.09,
+        "total_ms": 52057.05
       }
     },
     {
@@ -2445,25 +2424,25 @@
         }
       ],
       "passed": true,
-      "generated_sql": "SELECT strftime('%Y-%m', created_at) AS month, COUNT(*) AS customer_count FROM customers GROUP BY month",
+      "generated_sql": "SELECT strftime('%Y-%m', created_at) AS month, COUNT(*) AS registration_count FROM customers GROUP BY strftime('%Y-%m', created_at) ORDER BY month",
       "actual_rows": [
         {
           "month": "2024-01",
-          "customer_count": 30
+          "registration_count": 30
         },
         {
           "month": "2024-02",
-          "customer_count": 20
+          "registration_count": 20
         }
       ],
       "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 2.35,
-        "llm_total_ms": 24821.09,
-        "sql_execution_ms": 0.52,
-        "other_processing_ms": 0.08,
-        "total_ms": 24824.04
+        "schema_processing_ms": 1.76,
+        "llm_total_ms": 2018.65,
+        "sql_execution_ms": 0.45,
+        "other_processing_ms": 0.04,
+        "total_ms": 2020.9
       }
     },
     {
@@ -2505,47 +2484,47 @@
         }
       ],
       "passed": true,
-      "generated_sql": "SELECT regions.name AS region, SUM(CASE WHEN orders.status = 'paid' THEN 1 ELSE 0 END) AS paid_orders, SUM(CASE WHEN orders.status = 'cancelled' THEN 1 ELSE 0 END) AS cancelled_orders, SUM(CASE WHEN orders.status = 'pending' THEN 1 ELSE 0 END) AS pending_orders FROM orders JOIN customers ON orders.customer_id = customers.id JOIN regions ON customers.region_id = regions.id GROUP BY regions.name",
+      "generated_sql": "SELECT r.name AS 地区,\n       SUM(CASE WHEN o.status = 'paid' THEN 1 ELSE 0 END) AS 已支付订单数,\n       SUM(CASE WHEN o.status = 'cancelled' THEN 1 ELSE 0 END) AS 取消订单数,\n       SUM(CASE WHEN o.status = 'pending' THEN 1 ELSE 0 END) AS 待支付订单数\nFROM orders o\nJOIN customers c ON o.customer_id = c.id\nJOIN regions r ON c.region_id = r.id\nGROUP BY r.id, r.name\nORDER BY r.name;",
       "actual_rows": [
         {
-          "region": "东北",
-          "paid_orders": 79,
-          "cancelled_orders": 6,
-          "pending_orders": 5
+          "地区": "东北",
+          "已支付订单数": 79,
+          "取消订单数": 6,
+          "待支付订单数": 5
         },
         {
-          "region": "华东",
-          "paid_orders": 67,
-          "cancelled_orders": 5,
-          "pending_orders": 2
+          "地区": "华东",
+          "已支付订单数": 67,
+          "取消订单数": 5,
+          "待支付订单数": 2
         },
         {
-          "region": "华北",
-          "paid_orders": 63,
-          "cancelled_orders": 3,
-          "pending_orders": 7
+          "地区": "华北",
+          "已支付订单数": 63,
+          "取消订单数": 3,
+          "待支付订单数": 7
         },
         {
-          "region": "华南",
-          "paid_orders": 74,
-          "cancelled_orders": 13,
-          "pending_orders": 3
+          "地区": "华南",
+          "已支付订单数": 74,
+          "取消订单数": 13,
+          "待支付订单数": 3
         },
         {
-          "region": "西南",
-          "paid_orders": 62,
-          "cancelled_orders": 7,
-          "pending_orders": 4
+          "地区": "西南",
+          "已支付订单数": 62,
+          "取消订单数": 7,
+          "待支付订单数": 4
         }
       ],
       "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 4.65,
-        "llm_total_ms": 33139.39,
-        "sql_execution_ms": 0.66,
+        "schema_processing_ms": 3.72,
+        "llm_total_ms": 15671.26,
+        "sql_execution_ms": 0.84,
         "other_processing_ms": 0.09,
-        "total_ms": 33144.79
+        "total_ms": 15675.91
       }
     },
     {
@@ -2592,63 +2571,54 @@
           "order_count": 11
         }
       ],
-      "passed": false,
-      "generated_sql": "SELECT customers.id, customers.name, COUNT(orders.id) AS 订单总数 FROM customers JOIN orders ON customers.id = orders.customer_id GROUP BY customers.id HAVING COUNT(orders.id) > 10",
+      "passed": true,
+      "generated_sql": "SELECT c.name, COUNT(o.id) AS order_count\nFROM customers c\nJOIN orders o ON c.id = o.customer_id\nGROUP BY c.id, c.name\nHAVING COUNT(o.id) > 10;",
       "actual_rows": [
         {
-          "id": 15,
           "name": "客户015",
-          "订单总数": 11
+          "order_count": 11
         },
         {
-          "id": 17,
           "name": "客户017",
-          "订单总数": 11
+          "order_count": 11
         },
         {
-          "id": 20,
           "name": "客户020",
-          "订单总数": 12
+          "order_count": 12
         },
         {
-          "id": 22,
           "name": "客户022",
-          "订单总数": 11
+          "order_count": 11
         },
         {
-          "id": 25,
           "name": "客户025",
-          "订单总数": 11
+          "order_count": 11
         },
         {
-          "id": 37,
           "name": "客户037",
-          "订单总数": 14
+          "order_count": 14
         },
         {
-          "id": 45,
           "name": "客户045",
-          "订单总数": 16
+          "order_count": 16
         },
         {
-          "id": 46,
           "name": "客户046",
-          "订单总数": 14
+          "order_count": 14
         },
         {
-          "id": 48,
           "name": "客户048",
-          "订单总数": 11
+          "order_count": 11
         }
       ],
       "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 1.91,
-        "llm_total_ms": 37962.46,
-        "sql_execution_ms": 0.61,
-        "other_processing_ms": 0.07,
-        "total_ms": 37965.05
+        "schema_processing_ms": 1.87,
+        "llm_total_ms": 14926.33,
+        "sql_execution_ms": 0.59,
+        "other_processing_ms": 0.06,
+        "total_ms": 14928.85
       }
     },
     {
@@ -2859,268 +2829,218 @@
           "paid_order_count": 2
         }
       ],
-      "passed": false,
-      "generated_sql": "SELECT customers.id, customers.name, COUNT(orders.id) AS 已支付订单数 FROM customers JOIN orders ON customers.id = orders.customer_id WHERE orders.status = 'paid' GROUP BY customers.id, customers.name HAVING COUNT(orders.id) >= 2",
+      "passed": true,
+      "generated_sql": "SELECT c.name, COUNT(o.id) AS paid_order_count\nFROM customers c\nJOIN orders o ON c.id = o.customer_id\nWHERE o.status = 'paid'\nGROUP BY c.id, c.name\nHAVING COUNT(o.id) >= 2\nORDER BY paid_order_count DESC, c.name;",
       "actual_rows": [
         {
-          "id": 1,
-          "name": "客户001",
-          "已支付订单数": 8
-        },
-        {
-          "id": 2,
-          "name": "客户002",
-          "已支付订单数": 6
-        },
-        {
-          "id": 3,
-          "name": "客户003",
-          "已支付订单数": 8
-        },
-        {
-          "id": 4,
-          "name": "客户004",
-          "已支付订单数": 6
-        },
-        {
-          "id": 5,
-          "name": "客户005",
-          "已支付订单数": 4
-        },
-        {
-          "id": 6,
-          "name": "客户006",
-          "已支付订单数": 6
-        },
-        {
-          "id": 7,
-          "name": "客户007",
-          "已支付订单数": 8
-        },
-        {
-          "id": 8,
-          "name": "客户008",
-          "已支付订单数": 6
-        },
-        {
-          "id": 9,
-          "name": "客户009",
-          "已支付订单数": 7
-        },
-        {
-          "id": 10,
-          "name": "客户010",
-          "已支付订单数": 4
-        },
-        {
-          "id": 11,
-          "name": "客户011",
-          "已支付订单数": 8
-        },
-        {
-          "id": 12,
-          "name": "客户012",
-          "已支付订单数": 6
-        },
-        {
-          "id": 13,
-          "name": "客户013",
-          "已支付订单数": 7
-        },
-        {
-          "id": 14,
-          "name": "客户014",
-          "已支付订单数": 10
-        },
-        {
-          "id": 15,
-          "name": "客户015",
-          "已支付订单数": 11
-        },
-        {
-          "id": 16,
-          "name": "客户016",
-          "已支付订单数": 6
-        },
-        {
-          "id": 17,
-          "name": "客户017",
-          "已支付订单数": 8
-        },
-        {
-          "id": 18,
-          "name": "客户018",
-          "已支付订单数": 4
-        },
-        {
-          "id": 19,
-          "name": "客户019",
-          "已支付订单数": 4
-        },
-        {
-          "id": 20,
           "name": "客户020",
-          "已支付订单数": 12
+          "paid_order_count": 12
         },
         {
-          "id": 21,
-          "name": "客户021",
-          "已支付订单数": 3
-        },
-        {
-          "id": 22,
-          "name": "客户022",
-          "已支付订单数": 9
-        },
-        {
-          "id": 23,
-          "name": "客户023",
-          "已支付订单数": 5
-        },
-        {
-          "id": 24,
-          "name": "客户024",
-          "已支付订单数": 6
-        },
-        {
-          "id": 25,
-          "name": "客户025",
-          "已支付订单数": 11
-        },
-        {
-          "id": 26,
-          "name": "客户026",
-          "已支付订单数": 8
-        },
-        {
-          "id": 27,
-          "name": "客户027",
-          "已支付订单数": 6
-        },
-        {
-          "id": 28,
-          "name": "客户028",
-          "已支付订单数": 3
-        },
-        {
-          "id": 29,
-          "name": "客户029",
-          "已支付订单数": 8
-        },
-        {
-          "id": 30,
-          "name": "客户030",
-          "已支付订单数": 6
-        },
-        {
-          "id": 31,
-          "name": "客户031",
-          "已支付订单数": 9
-        },
-        {
-          "id": 32,
-          "name": "客户032",
-          "已支付订单数": 8
-        },
-        {
-          "id": 33,
-          "name": "客户033",
-          "已支付订单数": 6
-        },
-        {
-          "id": 34,
-          "name": "客户034",
-          "已支付订单数": 6
-        },
-        {
-          "id": 35,
-          "name": "客户035",
-          "已支付订单数": 6
-        },
-        {
-          "id": 36,
-          "name": "客户036",
-          "已支付订单数": 2
-        },
-        {
-          "id": 37,
           "name": "客户037",
-          "已支付订单数": 12
+          "paid_order_count": 12
         },
         {
-          "id": 38,
-          "name": "客户038",
-          "已支付订单数": 7
-        },
-        {
-          "id": 39,
-          "name": "客户039",
-          "已支付订单数": 5
-        },
-        {
-          "id": 40,
-          "name": "客户040",
-          "已支付订单数": 5
-        },
-        {
-          "id": 41,
-          "name": "客户041",
-          "已支付订单数": 5
-        },
-        {
-          "id": 42,
-          "name": "客户042",
-          "已支付订单数": 4
-        },
-        {
-          "id": 43,
-          "name": "客户043",
-          "已支付订单数": 8
-        },
-        {
-          "id": 44,
-          "name": "客户044",
-          "已支付订单数": 5
-        },
-        {
-          "id": 45,
           "name": "客户045",
-          "已支付订单数": 12
+          "paid_order_count": 12
         },
         {
-          "id": 46,
           "name": "客户046",
-          "已支付订单数": 12
+          "paid_order_count": 12
         },
         {
-          "id": 47,
-          "name": "客户047",
-          "已支付订单数": 7
+          "name": "客户015",
+          "paid_order_count": 11
         },
         {
-          "id": 48,
+          "name": "客户025",
+          "paid_order_count": 11
+        },
+        {
+          "name": "客户014",
+          "paid_order_count": 10
+        },
+        {
+          "name": "客户022",
+          "paid_order_count": 9
+        },
+        {
+          "name": "客户031",
+          "paid_order_count": 9
+        },
+        {
           "name": "客户048",
-          "已支付订单数": 9
+          "paid_order_count": 9
         },
         {
-          "id": 49,
-          "name": "客户049",
-          "已支付订单数": 5
+          "name": "客户001",
+          "paid_order_count": 8
         },
         {
-          "id": 50,
+          "name": "客户003",
+          "paid_order_count": 8
+        },
+        {
+          "name": "客户007",
+          "paid_order_count": 8
+        },
+        {
+          "name": "客户011",
+          "paid_order_count": 8
+        },
+        {
+          "name": "客户017",
+          "paid_order_count": 8
+        },
+        {
+          "name": "客户026",
+          "paid_order_count": 8
+        },
+        {
+          "name": "客户029",
+          "paid_order_count": 8
+        },
+        {
+          "name": "客户032",
+          "paid_order_count": 8
+        },
+        {
+          "name": "客户043",
+          "paid_order_count": 8
+        },
+        {
           "name": "客户050",
-          "已支付订单数": 8
+          "paid_order_count": 8
+        },
+        {
+          "name": "客户009",
+          "paid_order_count": 7
+        },
+        {
+          "name": "客户013",
+          "paid_order_count": 7
+        },
+        {
+          "name": "客户038",
+          "paid_order_count": 7
+        },
+        {
+          "name": "客户047",
+          "paid_order_count": 7
+        },
+        {
+          "name": "客户002",
+          "paid_order_count": 6
+        },
+        {
+          "name": "客户004",
+          "paid_order_count": 6
+        },
+        {
+          "name": "客户006",
+          "paid_order_count": 6
+        },
+        {
+          "name": "客户008",
+          "paid_order_count": 6
+        },
+        {
+          "name": "客户012",
+          "paid_order_count": 6
+        },
+        {
+          "name": "客户016",
+          "paid_order_count": 6
+        },
+        {
+          "name": "客户024",
+          "paid_order_count": 6
+        },
+        {
+          "name": "客户027",
+          "paid_order_count": 6
+        },
+        {
+          "name": "客户030",
+          "paid_order_count": 6
+        },
+        {
+          "name": "客户033",
+          "paid_order_count": 6
+        },
+        {
+          "name": "客户034",
+          "paid_order_count": 6
+        },
+        {
+          "name": "客户035",
+          "paid_order_count": 6
+        },
+        {
+          "name": "客户023",
+          "paid_order_count": 5
+        },
+        {
+          "name": "客户039",
+          "paid_order_count": 5
+        },
+        {
+          "name": "客户040",
+          "paid_order_count": 5
+        },
+        {
+          "name": "客户041",
+          "paid_order_count": 5
+        },
+        {
+          "name": "客户044",
+          "paid_order_count": 5
+        },
+        {
+          "name": "客户049",
+          "paid_order_count": 5
+        },
+        {
+          "name": "客户005",
+          "paid_order_count": 4
+        },
+        {
+          "name": "客户010",
+          "paid_order_count": 4
+        },
+        {
+          "name": "客户018",
+          "paid_order_count": 4
+        },
+        {
+          "name": "客户019",
+          "paid_order_count": 4
+        },
+        {
+          "name": "客户042",
+          "paid_order_count": 4
+        },
+        {
+          "name": "客户021",
+          "paid_order_count": 3
+        },
+        {
+          "name": "客户028",
+          "paid_order_count": 3
+        },
+        {
+          "name": "客户036",
+          "paid_order_count": 2
         }
       ],
       "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 4.62,
-        "llm_total_ms": 51358.1,
-        "sql_execution_ms": 0.71,
-        "other_processing_ms": 0.1,
-        "total_ms": 51363.53
+        "schema_processing_ms": 2.96,
+        "llm_total_ms": 8388.83,
+        "sql_execution_ms": 0.74,
+        "other_processing_ms": 0.07,
+        "total_ms": 8392.6
       }
     },
     {
@@ -3134,21 +3054,465 @@
           "high_value_order_count": 149
         }
       ],
-      "passed": true,
-      "generated_sql": "SELECT COUNT(*) AS 已支付订单数 FROM orders WHERE status = 'paid' AND (SELECT SUM(unit_price * quantity) FROM order_items WHERE order_id = orders.id) > 2000;",
+      "passed": false,
+      "generated_sql": "SELECT COUNT(DISTINCT o.id) AS paid_orders_over_2000 FROM orders o INNER JOIN order_items oi ON o.id = oi.order_id WHERE o.status = 'paid' GROUP BY o.id HAVING SUM(oi.quantity * oi.unit_price) > 2000",
       "actual_rows": [
         {
-          "已支付订单数": 149
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
+        },
+        {
+          "paid_orders_over_2000": 1
         }
       ],
-      "was_review_corrected": true,
+      "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 1.87,
-        "llm_total_ms": 95080.97,
-        "sql_execution_ms": 9.12,
-        "other_processing_ms": 0.11,
-        "total_ms": 95092.07
+        "schema_processing_ms": 1.64,
+        "llm_total_ms": 52271.0,
+        "sql_execution_ms": 2.57,
+        "other_processing_ms": 0.05,
+        "total_ms": 52275.26
       }
     },
     {
@@ -3175,8 +3539,35 @@
           "sales_percentage": 10.89
         }
       ],
-      "passed": false,
-      "error": "LLMResponseError: 模型服务请求超时，已达到最大重试次数。"
+      "passed": true,
+      "generated_sql": "SELECT c.name AS category_name, ROUND(SUM(oi.quantity * oi.unit_price) * 100.0 / (SELECT SUM(oi2.quantity * oi2.unit_price) FROM order_items oi2 JOIN orders o2 ON oi2.order_id = o2.id WHERE o2.status = 'paid'), 2) AS percentage FROM categories c JOIN products p ON c.id = p.category_id JOIN order_items oi ON p.id = oi.product_id JOIN orders o ON oi.order_id = o.id WHERE o.status = 'paid' GROUP BY c.id, c.name ORDER BY c.name;",
+      "actual_rows": [
+        {
+          "category_name": "办公用品",
+          "percentage": 40.96
+        },
+        {
+          "category_name": "家居生活",
+          "percentage": 10.89
+        },
+        {
+          "category_name": "数码产品",
+          "percentage": 19.49
+        },
+        {
+          "category_name": "运动户外",
+          "percentage": 28.67
+        }
+      ],
+      "was_review_corrected": false,
+      "was_repaired": false,
+      "timings": {
+        "schema_processing_ms": 1.65,
+        "llm_total_ms": 14329.55,
+        "sql_execution_ms": 0.96,
+        "other_processing_ms": 0.07,
+        "total_ms": 14332.23
+      }
     },
     {
       "id": 46,
@@ -3212,7 +3603,38 @@
         }
       ],
       "passed": false,
-      "error": "SQLExecutionError: SQL 执行失败，且已达到自动修复次数限制。"
+      "generated_sql": "SELECT r.name AS region_name, ROUND(SUM(oi.quantity * oi.unit_price), 2) AS total_sales\nFROM orders o\nJOIN order_items oi ON o.id = oi.order_id\nJOIN customers c ON o.customer_id = c.id\nJOIN regions r ON c.region_id = r.id\nWHERE o.status = 'paid'\nGROUP BY r.id, r.name\nORDER BY total_sales DESC, r.name ASC;",
+      "actual_rows": [
+        {
+          "region_name": "东北",
+          "total_sales": 196001.0
+        },
+        {
+          "region_name": "华东",
+          "total_sales": 154493.0
+        },
+        {
+          "region_name": "华南",
+          "total_sales": 154360.0
+        },
+        {
+          "region_name": "西南",
+          "total_sales": 135327.0
+        },
+        {
+          "region_name": "华北",
+          "total_sales": 130674.0
+        }
+      ],
+      "was_review_corrected": false,
+      "was_repaired": false,
+      "timings": {
+        "schema_processing_ms": 1.66,
+        "llm_total_ms": 6246.37,
+        "sql_execution_ms": 1.36,
+        "other_processing_ms": 0.07,
+        "total_ms": 6249.46
+      }
     },
     {
       "id": 47,
@@ -3342,8 +3764,139 @@
           "cumulative_sales": 770855.0
         }
       ],
-      "passed": false,
-      "error": "LLMResponseError: 模型服务请求超时，已达到最大重试次数。"
+      "passed": true,
+      "generated_sql": "SELECT strftime('%Y-%m', o.created_at) AS month, ROUND(SUM(oi.quantity * oi.unit_price), 2) AS paid_sales, ROUND(SUM(SUM(oi.quantity * oi.unit_price)) OVER (ORDER BY strftime('%Y-%m', o.created_at)), 2) AS cumulative_sales FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE o.status = 'paid' GROUP BY strftime('%Y-%m', o.created_at) ORDER BY month",
+      "actual_rows": [
+        {
+          "month": "2024-01",
+          "paid_sales": 47172.0,
+          "cumulative_sales": 47172.0
+        },
+        {
+          "month": "2024-02",
+          "paid_sales": 36912.0,
+          "cumulative_sales": 84084.0
+        },
+        {
+          "month": "2024-03",
+          "paid_sales": 22835.0,
+          "cumulative_sales": 106919.0
+        },
+        {
+          "month": "2024-04",
+          "paid_sales": 28849.0,
+          "cumulative_sales": 135768.0
+        },
+        {
+          "month": "2024-05",
+          "paid_sales": 30490.0,
+          "cumulative_sales": 166258.0
+        },
+        {
+          "month": "2024-06",
+          "paid_sales": 34643.0,
+          "cumulative_sales": 200901.0
+        },
+        {
+          "month": "2024-07",
+          "paid_sales": 25719.0,
+          "cumulative_sales": 226620.0
+        },
+        {
+          "month": "2024-08",
+          "paid_sales": 31469.0,
+          "cumulative_sales": 258089.0
+        },
+        {
+          "month": "2024-09",
+          "paid_sales": 29771.0,
+          "cumulative_sales": 287860.0
+        },
+        {
+          "month": "2024-10",
+          "paid_sales": 22869.0,
+          "cumulative_sales": 310729.0
+        },
+        {
+          "month": "2024-11",
+          "paid_sales": 29172.0,
+          "cumulative_sales": 339901.0
+        },
+        {
+          "month": "2024-12",
+          "paid_sales": 38078.0,
+          "cumulative_sales": 377979.0
+        },
+        {
+          "month": "2025-01",
+          "paid_sales": 28501.0,
+          "cumulative_sales": 406480.0
+        },
+        {
+          "month": "2025-02",
+          "paid_sales": 20243.0,
+          "cumulative_sales": 426723.0
+        },
+        {
+          "month": "2025-03",
+          "paid_sales": 24942.0,
+          "cumulative_sales": 451665.0
+        },
+        {
+          "month": "2025-04",
+          "paid_sales": 47916.0,
+          "cumulative_sales": 499581.0
+        },
+        {
+          "month": "2025-05",
+          "paid_sales": 30919.0,
+          "cumulative_sales": 530500.0
+        },
+        {
+          "month": "2025-06",
+          "paid_sales": 33716.0,
+          "cumulative_sales": 564216.0
+        },
+        {
+          "month": "2025-07",
+          "paid_sales": 41184.0,
+          "cumulative_sales": 605400.0
+        },
+        {
+          "month": "2025-08",
+          "paid_sales": 32419.0,
+          "cumulative_sales": 637819.0
+        },
+        {
+          "month": "2025-09",
+          "paid_sales": 24456.0,
+          "cumulative_sales": 662275.0
+        },
+        {
+          "month": "2025-10",
+          "paid_sales": 46058.0,
+          "cumulative_sales": 708333.0
+        },
+        {
+          "month": "2025-11",
+          "paid_sales": 34397.0,
+          "cumulative_sales": 742730.0
+        },
+        {
+          "month": "2025-12",
+          "paid_sales": 28125.0,
+          "cumulative_sales": 770855.0
+        }
+      ],
+      "was_review_corrected": false,
+      "was_repaired": false,
+      "timings": {
+        "schema_processing_ms": 2.22,
+        "llm_total_ms": 8859.22,
+        "sql_execution_ms": 1.14,
+        "other_processing_ms": 0.07,
+        "total_ms": 8862.65
+      }
     },
     {
       "id": 48,
@@ -3358,21 +3911,21 @@
         }
       ],
       "passed": true,
-      "generated_sql": "SELECT products.name, SUM(order_items.quantity) AS 商品销量 FROM products JOIN order_items ON products.id = order_items.product_id JOIN orders ON order_items.order_id = orders.id WHERE orders.status = 'paid' AND strftime('%Y', orders.created_at) = '2024' GROUP BY products.id ORDER BY 商品销量 DESC LIMIT 1",
+      "generated_sql": "SELECT p.name, SUM(oi.quantity) AS total_sold\nFROM orders o\nJOIN order_items oi ON o.id = oi.order_id\nJOIN products p ON oi.product_id = p.id\nWHERE o.status = 'paid'\n  AND strftime('%Y', o.created_at) = '2024'\nGROUP BY p.id, p.name\nORDER BY total_sold DESC, p.name ASC\nLIMIT 1;",
       "actual_rows": [
         {
           "name": "智能台灯",
-          "商品销量": 147
+          "total_sold": 147
         }
       ],
-      "was_review_corrected": true,
+      "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 1.7,
-        "llm_total_ms": 54255.73,
-        "sql_execution_ms": 0.91,
-        "other_processing_ms": 0.13,
-        "total_ms": 54258.47
+        "schema_processing_ms": 3.57,
+        "llm_total_ms": 9343.47,
+        "sql_execution_ms": 0.93,
+        "other_processing_ms": 0.07,
+        "total_ms": 9348.04
       }
     },
     {
@@ -3415,66 +3968,50 @@
           "avg_price_difference": 0.0
         }
       ],
-      "passed": false,
-      "generated_sql": "SELECT products.id AS 商品ID, products.price AS 目录价格, ROUND(AVG(order_items.unit_price), 2) AS 历史订单单价, ROUND(AVG(products.price - order_items.unit_price), 2) AS 平均差额 FROM products JOIN order_items ON products.id = order_items.product_id GROUP BY products.id",
+      "passed": true,
+      "generated_sql": "SELECT p.name AS 商品名称, ROUND(AVG(p.price - oi.unit_price), 2) AS 平均差额 FROM products p JOIN order_items oi ON p.id = oi.product_id GROUP BY p.id, p.name ORDER BY p.name;",
       "actual_rows": [
         {
-          "商品ID": 1,
-          "目录价格": 299,
-          "历史订单单价": 299.0,
+          "商品名称": "人体工学椅",
           "平均差额": 0.0
         },
         {
-          "商品ID": 2,
-          "目录价格": 459,
-          "历史订单单价": 459.0,
+          "商品名称": "保温杯",
           "平均差额": 0.0
         },
         {
-          "商品ID": 3,
-          "目录价格": 129,
-          "历史订单单价": 129.0,
+          "商品名称": "无线耳机",
           "平均差额": 0.0
         },
         {
-          "商品ID": 4,
-          "目录价格": 1299,
-          "历史订单单价": 1299.0,
+          "商品名称": "智能台灯",
           "平均差额": 0.0
         },
         {
-          "商品ID": 5,
-          "目录价格": 239,
-          "历史订单单价": 239.0,
+          "商品名称": "机械键盘",
           "平均差额": 0.0
         },
         {
-          "商品ID": 6,
-          "目录价格": 99,
-          "历史订单单价": 99.0,
+          "商品名称": "瑜伽垫",
           "平均差额": 0.0
         },
         {
-          "商品ID": 7,
-          "目录价格": 159,
-          "历史订单单价": 159.0,
+          "商品名称": "笔记本支架",
           "平均差额": 0.0
         },
         {
-          "商品ID": 8,
-          "目录价格": 899,
-          "历史订单单价": 899.0,
+          "商品名称": "露营帐篷",
           "平均差额": 0.0
         }
       ],
-      "was_review_corrected": true,
+      "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 1.86,
-        "llm_total_ms": 131634.67,
-        "sql_execution_ms": 0.75,
-        "other_processing_ms": 0.11,
-        "total_ms": 131637.39
+        "schema_processing_ms": 1.78,
+        "llm_total_ms": 12386.64,
+        "sql_execution_ms": 0.85,
+        "other_processing_ms": 0.07,
+        "total_ms": 12389.34
       }
     },
     {
@@ -3506,37 +4043,37 @@
         }
       ],
       "passed": true,
-      "generated_sql": "SELECT regions.name AS region, ROUND(COUNT(CASE WHEN orders.status = 'paid' THEN 1 END) * 100.0 / COUNT(orders.id), 2) AS payment_success_rate FROM orders JOIN customers ON orders.customer_id = customers.id JOIN regions ON customers.region_id = regions.id GROUP BY regions.name ORDER BY payment_success_rate DESC;",
+      "generated_sql": "SELECT r.name AS region_name, ROUND(COUNT(CASE WHEN o.status = 'paid' THEN 1 END) * 100.0 / COUNT(*), 2) AS payment_success_rate FROM orders o JOIN customers c ON o.customer_id = c.id JOIN regions r ON c.region_id = r.id GROUP BY r.id, r.name ORDER BY payment_success_rate DESC",
       "actual_rows": [
         {
-          "region": "华东",
+          "region_name": "华东",
           "payment_success_rate": 90.54
         },
         {
-          "region": "东北",
+          "region_name": "东北",
           "payment_success_rate": 87.78
         },
         {
-          "region": "华北",
+          "region_name": "华北",
           "payment_success_rate": 86.3
         },
         {
-          "region": "西南",
+          "region_name": "西南",
           "payment_success_rate": 84.93
         },
         {
-          "region": "华南",
+          "region_name": "华南",
           "payment_success_rate": 82.22
         }
       ],
       "was_review_corrected": false,
       "was_repaired": false,
       "timings": {
-        "schema_processing_ms": 1.76,
-        "llm_total_ms": 13407.32,
-        "sql_execution_ms": 0.62,
-        "other_processing_ms": 0.1,
-        "total_ms": 13409.8
+        "schema_processing_ms": 3.02,
+        "llm_total_ms": 4264.66,
+        "sql_execution_ms": 0.66,
+        "other_processing_ms": 0.06,
+        "total_ms": 4268.4
       }
     }
   ]

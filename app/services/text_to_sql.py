@@ -28,12 +28,13 @@ class TextToSQLService:
         self,
         llm_client: OpenAICompatibleClient | None = None,
         target_engine: Engine = engine,
+        enable_sql_review: bool = settings.query_enable_sql_review,
     ) -> None:
         self.llm_client = llm_client or OpenAICompatibleClient()
         self.target_engine = target_engine
         self.sql_executor = SQLExecutor(target_engine, max_rows=settings.query_max_rows)
         self.max_repair_attempts = settings.query_max_repair_attempts
-        self.enable_sql_review = settings.query_enable_sql_review
+        self.enable_sql_review = enable_sql_review
 
     async def generate(self, question: str) -> QueryResponse:
         total_started_at = perf_counter()

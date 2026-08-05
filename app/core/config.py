@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     app_env: Literal["development", "test", "production"] = "development"
     app_debug: bool = False
     database_url: str = "sqlite:///./data/datapilot.db"
+    audit_database_url: str = "sqlite:///./data/audit.db"
     llm_base_url: str = "https://api.openai.com/v1"
     llm_api_key: str | None = None
     llm_model: str = "gpt-4o-mini"
