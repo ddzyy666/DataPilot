@@ -1,7 +1,7 @@
 import pytest
 from sqlalchemy import create_engine, text
 
-from app.services.sql_executor import SQLExecutionError, SQLExecutor
+from app.services.sql_executor import SQLExecutionError, SQLExecutor, SQLQueryTimeoutError
 
 
 def test_executor_returns_columns_rows_and_truncation() -> None:
@@ -32,3 +32,19 @@ def test_executor_uses_readonly_sqlite_connection() -> None:
 
     assert "OperationalError" in error.value.database_error
     assert error.value.execution_time_ms >= 0
+
+
+def test_executor_interrupts_long_running_sql() -> None:
+    test_engine = create_engine("sqlite://")
+    executor = SQLExecutor(test_engine, timeout_seconds=0.001)
+    expensive_sql = """
+        WITH RECURSIVE numbers(value) AS (
+            SELECT 1
+            UNION ALL
+            SELECT value + 1 FROM numbers WHERE value < 100000000
+        )
+        SELECT SUM(value) FROM numbers
+    """
+
+    with pytest.raises(SQLQueryTimeoutError, match="查询已被中断"):
+        executor.execute(expensive_sql)

@@ -5,12 +5,14 @@ from uuid import uuid4
 from fastapi import APIRouter, HTTPException, Response
 
 from app.audit.service import QueryAuditService
+from app.core.config import settings
 from app.db.base import engine
 from app.db.metadata import inspect_schema
 from app.llm.client import LLMConfigurationError, LLMResponseError
 from app.schemas.audit import AuditRecordResponse
 from app.schemas.query import QueryRequest, QueryResponse
-from app.services.sql_executor import SQLExecutionError
+from app.services.sql_executor import SQLExecutionError, SQLQueryTimeoutError
+from app.services.sql_permissions import SQLPermissionError, SQLPermissionPolicy
 from app.services.text_to_sql import SQLSafetyError, TextToSQLService
 
 router = APIRouter(prefix="/api/v1")
@@ -25,7 +27,12 @@ audit_service = QueryAuditService()
     response_description="数据库结构读取成功",
 )
 async def get_schema() -> dict[str, Any]:
-    return inspect_schema(engine)
+    permission_policy = SQLPermissionPolicy.from_strings(
+        allowed_tables=settings.query_allowed_tables,
+        denied_columns=settings.query_denied_columns,
+        dialect=engine.dialect.name,
+    )
+    return permission_policy.filter_schema(inspect_schema(engine))
 
 
 @router.get(
@@ -59,6 +66,8 @@ async def generate_sql(request: QueryRequest, response: Response) -> QueryRespon
         LLMConfigurationError,
         LLMResponseError,
         SQLExecutionError,
+        SQLQueryTimeoutError,
+        SQLPermissionError,
         SQLSafetyError,
         ValueError,
         TypeError,

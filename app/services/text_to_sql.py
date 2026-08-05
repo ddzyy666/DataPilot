@@ -17,6 +17,7 @@ from app.llm.prompts import (
 from app.schemas.query import QueryResponse, StageTimings
 from app.services.schema_formatter import format_schema_for_prompt
 from app.services.sql_executor import SQLExecutionError, SQLExecutor
+from app.services.sql_permissions import SQLPermissionPolicy
 
 
 class SQLSafetyError(ValueError):
@@ -32,7 +33,17 @@ class TextToSQLService:
     ) -> None:
         self.llm_client = llm_client or OpenAICompatibleClient()
         self.target_engine = target_engine
-        self.sql_executor = SQLExecutor(target_engine, max_rows=settings.query_max_rows)
+        self.permission_policy = SQLPermissionPolicy.from_strings(
+            allowed_tables=settings.query_allowed_tables,
+            denied_columns=settings.query_denied_columns,
+            dialect=target_engine.dialect.name,
+        )
+        self.sql_executor = SQLExecutor(
+            target_engine,
+            max_rows=settings.query_max_rows,
+            timeout_seconds=settings.query_timeout_seconds,
+            permission_policy=self.permission_policy,
+        )
         self.max_repair_attempts = settings.query_max_repair_attempts
         self.enable_sql_review = enable_sql_review
 
@@ -40,7 +51,7 @@ class TextToSQLService:
         total_started_at = perf_counter()
 
         schema_started_at = perf_counter()
-        schema = inspect_schema(self.target_engine)
+        schema = self.permission_policy.filter_schema(inspect_schema(self.target_engine))
         schema_context = format_schema_for_prompt(schema)
         schema_processing_ms = self._elapsed_ms(schema_started_at)
 

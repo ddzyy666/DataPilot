@@ -21,6 +21,11 @@ class Settings(BaseSettings):
     llm_max_retries: int = 1
     llm_retry_delay_seconds: float = 1.0
     query_max_rows: int = 200
+    query_timeout_seconds: float = 5.0
+    query_allowed_tables: str = (
+        "regions,customers,categories,products,orders,order_items"
+    )
+    query_denied_columns: str = ""
     query_max_repair_attempts: int = 1
     query_enable_sql_review: bool = True
 
