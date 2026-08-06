@@ -29,7 +29,17 @@ class QueryAuditService:
         try:
             self._ensure_initialized()
             with Session(self.target_engine) as session:
-                session.add(log)
+                existing = session.scalar(
+                    select(QueryAuditLog).where(
+                        QueryAuditLog.request_id == log.request_id
+                    )
+                )
+                if existing is None:
+                    session.add(log)
+                else:
+                    for column in QueryAuditLog.__table__.columns:
+                        if column.name not in {"id", "request_id", "created_at"}:
+                            setattr(existing, column.name, getattr(log, column.name))
                 session.commit()
             return True
         except SQLAlchemyError:
@@ -56,6 +66,7 @@ class QueryAuditService:
         llm_time_ms: float,
         sql_time_ms: float,
         total_time_ms: float,
+        status: str = "success",
     ) -> QueryAuditLog:
         return QueryAuditLog(
             request_id=request_id,
@@ -63,7 +74,7 @@ class QueryAuditService:
             model=settings.llm_model,
             review_enabled=settings.query_enable_sql_review,
             generated_sql=generated_sql,
-            status="success",
+            status=status,
             row_count=row_count,
             was_repaired=was_repaired,
             llm_time_ms=llm_time_ms,

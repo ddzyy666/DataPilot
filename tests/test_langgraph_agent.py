@@ -43,6 +43,17 @@ class GraphRepairFakeLLMClient(OpenAICompatibleClient):
         """
 
 
+class HighRiskFakeLLMClient(OpenAICompatibleClient):
+    async def complete(self, messages: list[dict[str, str]]) -> str:
+        return """
+        {
+          "sql": "SELECT status, RANK() OVER (ORDER BY COUNT(*) DESC) AS ranking FROM orders GROUP BY status",
+          "explanation": "使用窗口函数对订单状态排名。",
+          "assumptions": []
+        }
+        """
+
+
 @pytest.mark.anyio
 async def test_langgraph_wraps_existing_services_and_returns_query_response() -> None:
     test_engine = create_engine("sqlite://")
@@ -92,10 +103,92 @@ def test_langgraph_contains_expected_business_nodes() -> None:
         "load_schema",
         "generate_sql",
         "review_sql",
+        "assess_risk",
+        "human_approval",
+        "reject_query",
         "execute_sql",
         "repair_sql",
         "raise_execution_error",
     }.issubset(node_names)
+
+
+@pytest.mark.anyio
+async def test_high_risk_sql_pauses_then_resumes_after_approval() -> None:
+    test_engine = create_engine("sqlite://")
+    Base.metadata.create_all(test_engine)
+    service = LangGraphTextToSQLService(
+        llm_client=HighRiskFakeLLMClient(),
+        target_engine=test_engine,
+        enable_sql_review=False,
+    )
+
+    pending = await service.generate("按订单状态排名", request_id="approval-test")
+
+    assert pending.status == "waiting_for_confirmation"
+    assert pending.requires_confirmation is True
+    assert pending.risk_level == "high"
+    assert pending.rows == []
+
+    completed = await service.resume("approval-test", approved=True)
+
+    assert completed.status == "completed"
+    assert completed.requires_confirmation is False
+    assert completed.columns == ["status", "ranking"]
+
+
+@pytest.mark.anyio
+async def test_high_risk_sql_can_be_rejected() -> None:
+    test_engine = create_engine("sqlite://")
+    Base.metadata.create_all(test_engine)
+    service = LangGraphTextToSQLService(
+        llm_client=HighRiskFakeLLMClient(),
+        target_engine=test_engine,
+        enable_sql_review=False,
+    )
+    await service.generate("按订单状态排名", request_id="reject-test")
+
+    rejected = await service.resume("reject-test", approved=False)
+
+    assert rejected.status == "rejected"
+    assert rejected.rows == []
+
+
+@pytest.mark.anyio
+async def test_sqlite_checkpoint_can_resume_after_service_restart(tmp_path) -> None:
+    test_engine = create_engine("sqlite://")
+    Base.metadata.create_all(test_engine)
+    checkpoint_path = str(tmp_path / "checkpoints.db")
+    first_service = LangGraphTextToSQLService(
+        llm_client=HighRiskFakeLLMClient(),
+        target_engine=test_engine,
+        enable_sql_review=False,
+        checkpoint_path=checkpoint_path,
+    )
+    pending = await first_service.generate("按订单状态排名", request_id="restart-test")
+    await first_service.close()
+
+    second_service = LangGraphTextToSQLService(
+        llm_client=HighRiskFakeLLMClient(),
+        target_engine=test_engine,
+        enable_sql_review=False,
+        checkpoint_path=checkpoint_path,
+    )
+    completed = await second_service.resume("restart-test", approved=True)
+    await second_service.close()
+
+    assert pending.status == "waiting_for_confirmation"
+    assert completed.status == "completed"
+
+
+@pytest.mark.anyio
+async def test_resume_rejects_unknown_request_id() -> None:
+    service = LangGraphTextToSQLService(
+        llm_client=HighRiskFakeLLMClient(),
+        enable_sql_review=False,
+    )
+
+    with pytest.raises(ValueError, match="没有找到等待人工确认"):
+        await service.resume("unknown-request", approved=True)
 
 
 def test_runtime_factory_selects_langgraph(monkeypatch: pytest.MonkeyPatch) -> None:

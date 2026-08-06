@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -13,6 +13,14 @@ class QueryRequest(BaseModel):
     )
 
 
+class QueryConfirmationRequest(BaseModel):
+    approved: bool = Field(description="是否批准执行SQL")
+    edited_sql: str | None = Field(
+        default=None,
+        description="可选的人工修改SQL；修改后仍会重新经过安全与权限校验",
+    )
+
+
 class StageTimings(BaseModel):
     schema_processing_ms: float = Field(default=0, description="读取并格式化数据库结构耗时")
     llm_total_ms: float = Field(default=0, description="所有模型调用的累计耗时")
@@ -23,6 +31,16 @@ class StageTimings(BaseModel):
 
 class QueryResponse(BaseModel):
     request_id: str = Field(default="", description="请求追踪ID")
+    status: Literal["completed", "waiting_for_confirmation", "rejected"] = Field(
+        default="completed",
+        description="Agent当前状态",
+    )
+    risk_level: Literal["low", "medium", "high"] = Field(
+        default="low",
+        description="SQL风险等级",
+    )
+    risk_reasons: list[str] = Field(default_factory=list, description="SQL风险原因")
+    requires_confirmation: bool = Field(default=False, description="是否需要人工确认")
     question: str = Field(description="原始用户问题")
     sql: str = Field(description="生成的只读 SQL")
     explanation: str = Field(description="SQL 思路说明")

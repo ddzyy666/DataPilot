@@ -11,7 +11,7 @@ from app.db.base import engine
 from app.db.metadata import inspect_schema
 from app.llm.client import LLMConfigurationError, LLMResponseError
 from app.schemas.audit import AuditRecordResponse
-from app.schemas.query import QueryRequest, QueryResponse
+from app.schemas.query import QueryConfirmationRequest, QueryRequest, QueryResponse
 from app.services.sql_executor import SQLExecutionError, SQLQueryTimeoutError
 from app.services.sql_permissions import SQLPermissionError, SQLPermissionPolicy
 from app.services.text_to_sql import SQLSafetyError
@@ -62,7 +62,7 @@ async def generate_sql(request: QueryRequest, response: Response) -> QueryRespon
     started_at = perf_counter()
     service = create_text_to_sql_service()
     try:
-        result = await service.generate(request.question)
+        result = await service.generate(request.question, request_id=request_id)
     except (
         LLMConfigurationError,
         LLMResponseError,
@@ -95,16 +95,64 @@ async def generate_sql(request: QueryRequest, response: Response) -> QueryRespon
         ) from exc
 
     result = result.model_copy(update={"request_id": request_id})
+    _record_result(result)
+    return result
+
+
+@router.post(
+    "/query/{request_id}/confirm",
+    tags=["数据库"],
+    summary="确认或拒绝高风险 SQL",
+    description="恢复被 checkpoint 暂停的查询，可批准、拒绝或提交修改后的只读 SQL。",
+)
+async def confirm_sql(
+    request_id: str,
+    request: QueryConfirmationRequest,
+    response: Response,
+) -> QueryResponse:
+    response.headers["X-Request-ID"] = request_id
+    service = create_text_to_sql_service()
+    resume = getattr(service, "resume", None)
+    if resume is None:
+        raise HTTPException(status_code=409, detail="当前运行模式不支持人工确认。")
+    try:
+        result = await resume(
+            request_id,
+            approved=request.approved,
+            edited_sql=request.edited_sql,
+        )
+    except (
+        LLMConfigurationError,
+        LLMResponseError,
+        SQLExecutionError,
+        SQLQueryTimeoutError,
+        SQLPermissionError,
+        SQLSafetyError,
+        ValueError,
+        TypeError,
+    ) as exc:
+        raise HTTPException(
+            status_code=422,
+            detail={"request_id": request_id, "message": str(exc)},
+            headers={"X-Request-ID": request_id},
+        ) from exc
+    _record_result(result)
+    return result
+
+
+def _record_result(result: QueryResponse) -> None:
     audit_service.record(
         audit_service.success_log(
-            request_id=request_id,
-            question=request.question,
+            request_id=result.request_id,
+            question=result.question,
             generated_sql=result.sql,
             row_count=result.row_count,
             was_repaired=result.was_repaired,
             llm_time_ms=result.timings.llm_total_ms,
             sql_time_ms=result.timings.sql_execution_ms,
             total_time_ms=result.timings.total_ms,
+            status=(
+                "success" if result.status == "completed" else result.status
+            ),
         )
     )
-    return result

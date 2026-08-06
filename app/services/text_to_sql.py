@@ -47,7 +47,9 @@ class TextToSQLService:
         self.max_repair_attempts = settings.query_max_repair_attempts
         self.enable_sql_review = enable_sql_review
 
-    async def generate(self, question: str) -> QueryResponse:
+    async def generate(
+        self, question: str, request_id: str | None = None
+    ) -> QueryResponse:
         total_started_at = perf_counter()
 
         schema_started_at = perf_counter()
@@ -166,6 +168,7 @@ class TextToSQLService:
         )
 
         return QueryResponse(
+            request_id=request_id or "",
             question=question,
             sql=sql,
             explanation=str(payload.get("explanation", "")).strip(),

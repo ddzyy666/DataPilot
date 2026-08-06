@@ -9,9 +9,11 @@ description = "A production-oriented Text-to-SQL data analysis agent."
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 dependencies = [
+    "aiosqlite>=0.20,<1.0",
     "fastapi>=0.115,<1.0",
     "httpx>=0.28,<1.0",
     "langgraph>=1.0,<2.0",
+    "langgraph-checkpoint-sqlite>=3.0,<4.0",
     "pydantic-settings>=2.7,<3.0",
     "sqlalchemy>=2.0,<3.0",
     "sqlglot>=30.0,<31.0",

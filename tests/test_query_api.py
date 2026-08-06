@@ -9,8 +9,11 @@ from app.schemas.query import QueryResponse
 
 
 class FakeTextToSQLService:
-    async def generate(self, question: str) -> QueryResponse:
+    async def generate(
+        self, question: str, request_id: str | None = None
+    ) -> QueryResponse:
         return QueryResponse(
+            request_id=request_id or "",
             question=question,
             sql="SELECT COUNT(*) AS order_count FROM orders",
             explanation="统计订单总数。",
@@ -45,7 +48,9 @@ async def test_query_endpoint_returns_generated_sql(monkeypatch: pytest.MonkeyPa
 
 
 class FailingTextToSQLService:
-    async def generate(self, question: str) -> QueryResponse:
+    async def generate(
+        self, question: str, request_id: str | None = None
+    ) -> QueryResponse:
         raise LLMResponseError("模型暂时不可用")
 
 

@@ -1,6 +1,8 @@
 from time import perf_counter
 from typing import Literal
 
+from langgraph.types import interrupt
+
 from app.agent.state import TextToSQLGraphState
 from app.db.metadata import inspect_schema
 from app.llm.prompts import (
@@ -10,12 +12,14 @@ from app.llm.prompts import (
 )
 from app.services.schema_formatter import format_schema_for_prompt
 from app.services.sql_executor import SQLExecutionError
+from app.services.sql_risk import SQLRiskAssessor
 from app.services.text_to_sql import TextToSQLService
 
 
 class TextToSQLGraphNodes:
-    def __init__(self, service: TextToSQLService) -> None:
+    def __init__(self, service: TextToSQLService, risk_assessor: SQLRiskAssessor) -> None:
         self.service = service
+        self.risk_assessor = risk_assessor
 
     async def load_schema(self, state: TextToSQLGraphState) -> dict:
         started_at = perf_counter()
@@ -113,6 +117,59 @@ class TextToSQLGraphNodes:
             "truncated": result.truncated,
             "execution_error": None,
             "sql_execution_ms": round(accumulated_ms + result.execution_time_ms, 2),
+            "status": "completed",
+        }
+
+    async def assess_risk(self, state: TextToSQLGraphState) -> dict:
+        assessment = self.risk_assessor.assess(
+            state["sql"],
+            dialect=self.service.target_engine.dialect.name,
+        )
+        requires_confirmation = assessment.requires_confirmation and not bool(
+            state.get("confirmed")
+        )
+        return {
+            "risk_level": assessment.level,
+            "risk_reasons": assessment.reasons,
+            "requires_confirmation": requires_confirmation,
+        }
+
+    async def human_approval(self, state: TextToSQLGraphState) -> dict:
+        decision = interrupt(
+            {
+                "request_id": state["request_id"],
+                "question": state["question"],
+                "sql": state["sql"],
+                "risk_level": state["risk_level"],
+                "risk_reasons": state["risk_reasons"],
+                "message": "该SQL风险较高，请确认是否执行。",
+            }
+        )
+        if not isinstance(decision, dict) or not isinstance(decision.get("approved"), bool):
+            raise TypeError("人工确认结果必须包含布尔类型的 approved 字段。")
+
+        approved = decision["approved"]
+        updates: dict = {
+            "confirmed": approved,
+            "status": "completed" if approved else "rejected",
+            "requires_confirmation": False,
+        }
+        edited_sql = decision.get("edited_sql")
+        if approved and edited_sql:
+            sql = str(edited_sql).strip()
+            self.service._validate_readonly_sql(sql)
+            self.service.permission_policy.validate(sql)
+            updates["sql"] = sql
+        return updates
+
+    async def reject_query(self, state: TextToSQLGraphState) -> dict:
+        return {
+            "status": "rejected",
+            "requires_confirmation": False,
+            "columns": [],
+            "rows": [],
+            "row_count": 0,
+            "truncated": False,
         }
 
     async def repair_sql(self, state: TextToSQLGraphState) -> dict:
@@ -138,6 +195,7 @@ class TextToSQLGraphNodes:
             "repair_attempts": state.get("repair_attempts", 0) + 1,
             "repair_llm_ms": round(state.get("repair_llm_ms", 0.0) + elapsed_ms, 2),
             "execution_error": None,
+            "confirmed": None,
         }
 
     async def raise_execution_error(self, state: TextToSQLGraphState) -> dict:
@@ -157,6 +215,14 @@ class TextToSQLGraphNodes:
         if state.get("repair_attempts", 0) < self.service.max_repair_attempts:
             return "repair"
         return "failed"
+
+    def route_after_risk(self, state: TextToSQLGraphState) -> Literal["approval", "execute"]:
+        return "approval" if state.get("requires_confirmation") else "execute"
+
+    def route_after_approval(self, state: TextToSQLGraphState) -> Literal[
+        "execute", "rejected"
+    ]:
+        return "execute" if state.get("confirmed") else "rejected"
 
     @staticmethod
     def _elapsed_ms(started_at: float) -> float:

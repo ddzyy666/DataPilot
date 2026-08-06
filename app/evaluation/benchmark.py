@@ -81,6 +81,8 @@ async def run_benchmark(cases: list[dict[str, Any]]) -> dict[str, Any]:
         }
         try:
             response = await service.generate(str(case["question"]))
+            if response.status == "waiting_for_confirmation":
+                response = await service.resume(response.request_id, approved=True)
             passed = normalize_rows(response.rows) == normalize_rows(expected.rows)
             item.update(
                 {

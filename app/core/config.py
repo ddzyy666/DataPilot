@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     agent_runtime: Literal["legacy", "langgraph"] = "legacy"
     database_url: str = "sqlite:///./data/datapilot.db"
     audit_database_url: str = "sqlite:///./data/audit.db"
+    checkpoint_database_path: str = "./data/checkpoints.db"
     llm_base_url: str = "https://api.openai.com/v1"
     llm_api_key: str | None = None
     llm_model: str = "gpt-4o-mini"
@@ -27,6 +28,7 @@ class Settings(BaseSettings):
         "regions,customers,categories,products,orders,order_items"
     )
     query_denied_columns: str = ""
+    query_require_confirmation_for_high_risk: bool = True
     query_max_repair_attempts: int = 1
     query_enable_sql_review: bool = True
 

@@ -1,11 +1,19 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 
+from app.agent.runtime import close_text_to_sql_runtime
 from app.api.docs import get_chinese_swagger_ui
 from app.api.routes import router
 from app.core.config import settings
 
 
 def create_app() -> FastAPI:
+    @asynccontextmanager
+    async def lifespan(_: FastAPI):
+        yield
+        await close_text_to_sql_runtime()
+
     application = FastAPI(
         title=f"{settings.app_name} 智能数据分析助手",
         description=(
@@ -16,6 +24,7 @@ def create_app() -> FastAPI:
         debug=settings.app_debug,
         docs_url=None,
         redoc_url=None,
+        lifespan=lifespan,
         openapi_tags=[
             {
                 "name": "系统",
