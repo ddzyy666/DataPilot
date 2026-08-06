@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     app_name: str = "DataPilot"
     app_env: Literal["development", "test", "production"] = "development"
     app_debug: bool = False
+    agent_runtime: Literal["legacy", "langgraph"] = "legacy"
     database_url: str = "sqlite:///./data/datapilot.db"
     audit_database_url: str = "sqlite:///./data/audit.db"
     llm_base_url: str = "https://api.openai.com/v1"

@@ -68,6 +68,7 @@ Useful endpoints:
 For SiliconFlow, a typical local `.env` configuration is:
 
 ```env
+AGENT_RUNTIME=legacy
 LLM_BASE_URL=https://api.siliconflow.cn/v1
 LLM_MODEL=Qwen/Qwen3-8B
 LLM_TIMEOUT_SECONDS=60
@@ -83,4 +84,10 @@ QUERY_ALLOWED_TABLES=regions,customers,categories,products,orders,order_items
 QUERY_DENIED_COLUMNS=
 QUERY_MAX_REPAIR_ATTEMPTS=1
 QUERY_ENABLE_SQL_REVIEW=true
+```
+
+Switch to the LangGraph orchestration runtime while keeping the same business services:
+
+```env
+AGENT_RUNTIME=langgraph
 ```

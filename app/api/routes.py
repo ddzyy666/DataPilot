@@ -4,6 +4,7 @@ from uuid import uuid4
 
 from fastapi import APIRouter, HTTPException, Response
 
+from app.agent.runtime import create_text_to_sql_service
 from app.audit.service import QueryAuditService
 from app.core.config import settings
 from app.db.base import engine
@@ -13,7 +14,7 @@ from app.schemas.audit import AuditRecordResponse
 from app.schemas.query import QueryRequest, QueryResponse
 from app.services.sql_executor import SQLExecutionError, SQLQueryTimeoutError
 from app.services.sql_permissions import SQLPermissionError, SQLPermissionPolicy
-from app.services.text_to_sql import SQLSafetyError, TextToSQLService
+from app.services.text_to_sql import SQLSafetyError
 
 router = APIRouter(prefix="/api/v1")
 audit_service = QueryAuditService()
@@ -59,7 +60,7 @@ async def generate_sql(request: QueryRequest, response: Response) -> QueryRespon
     request_id = str(uuid4())
     response.headers["X-Request-ID"] = request_id
     started_at = perf_counter()
-    service = TextToSQLService()
+    service = create_text_to_sql_service()
     try:
         result = await service.generate(request.question)
     except (

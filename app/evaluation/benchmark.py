@@ -6,9 +6,9 @@ from decimal import Decimal
 from pathlib import Path
 from typing import Any
 
+from app.agent.runtime import create_text_to_sql_service
 from app.db.base import engine
 from app.services.sql_executor import SQLExecutor
-from app.services.text_to_sql import TextToSQLService
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DATASET = PROJECT_ROOT / "benchmarks" / "text_to_sql_50.json"
@@ -65,7 +65,7 @@ def validate_gold_answers(cases: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 
 async def run_benchmark(cases: list[dict[str, Any]]) -> dict[str, Any]:
-    service = TextToSQLService()
+    service = create_text_to_sql_service()
     executor = SQLExecutor(engine, max_rows=1000)
     results: list[dict[str, Any]] = []
 

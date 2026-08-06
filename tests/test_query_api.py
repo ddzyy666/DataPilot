@@ -22,7 +22,9 @@ class FakeTextToSQLService:
 @pytest.mark.anyio
 async def test_query_endpoint_returns_generated_sql(monkeypatch: pytest.MonkeyPatch) -> None:
     test_audit_service = QueryAuditService(create_engine("sqlite://"))
-    monkeypatch.setattr("app.api.routes.TextToSQLService", lambda: FakeTextToSQLService())
+    monkeypatch.setattr(
+        "app.api.routes.create_text_to_sql_service", lambda: FakeTextToSQLService()
+    )
     monkeypatch.setattr("app.api.routes.audit_service", test_audit_service)
 
     async with AsyncClient(
@@ -50,7 +52,9 @@ class FailingTextToSQLService:
 @pytest.mark.anyio
 async def test_query_endpoint_audits_failed_request(monkeypatch: pytest.MonkeyPatch) -> None:
     test_audit_service = QueryAuditService(create_engine("sqlite://"))
-    monkeypatch.setattr("app.api.routes.TextToSQLService", lambda: FailingTextToSQLService())
+    monkeypatch.setattr(
+        "app.api.routes.create_text_to_sql_service", lambda: FailingTextToSQLService()
+    )
     monkeypatch.setattr("app.api.routes.audit_service", test_audit_service)
 
     async with AsyncClient(
