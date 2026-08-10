@@ -28,6 +28,8 @@ class Settings(BaseSettings):
         "regions,customers,categories,products,orders,order_items"
     )
     query_denied_columns: str = ""
+    query_enable_clarification: bool = True
+    query_max_clarification_rounds: int = 2
     query_require_confirmation_for_high_risk: bool = True
     query_max_repair_attempts: int = 1
     query_enable_sql_review: bool = True

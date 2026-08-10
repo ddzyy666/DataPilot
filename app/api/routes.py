@@ -11,7 +11,12 @@ from app.db.base import engine
 from app.db.metadata import inspect_schema
 from app.llm.client import LLMConfigurationError, LLMResponseError
 from app.schemas.audit import AuditRecordResponse
-from app.schemas.query import QueryConfirmationRequest, QueryRequest, QueryResponse
+from app.schemas.query import (
+    QueryClarificationRequest,
+    QueryConfirmationRequest,
+    QueryRequest,
+    QueryResponse,
+)
 from app.services.sql_executor import SQLExecutionError, SQLQueryTimeoutError
 from app.services.sql_permissions import SQLPermissionError, SQLPermissionPolicy
 from app.services.text_to_sql import SQLSafetyError
@@ -133,6 +138,44 @@ async def confirm_sql(
     ) as exc:
         raise HTTPException(
             status_code=422,
+            detail={"request_id": request_id, "message": str(exc)},
+            headers={"X-Request-ID": request_id},
+        ) from exc
+    _record_result(result)
+    return result
+
+
+@router.post(
+    "/query/{request_id}/clarify",
+    tags=["数据库"],
+    summary="补充查询问题信息",
+    description="恢复被 checkpoint 暂停的查询，将用户回答合并到原问题后继续执行。",
+)
+async def clarify_query(
+    request_id: str,
+    request: QueryClarificationRequest,
+    response: Response,
+) -> QueryResponse:
+    response.headers["X-Request-ID"] = request_id
+    service = create_text_to_sql_service()
+    clarify = getattr(service, "clarify", None)
+    if clarify is None:
+        raise HTTPException(status_code=409, detail="当前运行模式不支持多轮澄清。")
+    try:
+        result = await clarify(request_id, answer=request.answer)
+    except (
+        LLMConfigurationError,
+        LLMResponseError,
+        SQLExecutionError,
+        SQLQueryTimeoutError,
+        SQLPermissionError,
+        SQLSafetyError,
+        ValueError,
+        TypeError,
+    ) as exc:
+        status_code = 502 if isinstance(exc, LLMResponseError) else 422
+        raise HTTPException(
+            status_code=status_code,
             detail={"request_id": request_id, "message": str(exc)},
             headers={"X-Request-ID": request_id},
         ) from exc

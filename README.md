@@ -63,6 +63,7 @@ Useful endpoints:
 - `GET /health` checks service availability.
 - `GET /api/v1/schema` returns database tables, columns, primary keys, and foreign keys.
 - `POST /api/v1/query` generates and executes a readonly SQL query from a natural-language question.
+- `POST /api/v1/query/{request_id}/clarify` resumes a query after the user supplies missing information.
 - `POST /api/v1/query/{request_id}/confirm` resumes or rejects a query waiting for approval.
 - `GET /api/v1/audit/{request_id}` returns the audit record for one query request.
 
@@ -92,8 +93,23 @@ Switch to the LangGraph orchestration runtime while keeping the same business se
 ```env
 AGENT_RUNTIME=langgraph
 CHECKPOINT_DATABASE_PATH=./data/checkpoints.db
+QUERY_ENABLE_CLARIFICATION=true
+QUERY_MAX_CLARIFICATION_ROUNDS=2
 QUERY_REQUIRE_CONFIRMATION_FOR_HIGH_RISK=true
 ```
+
+If the question is materially ambiguous, `/api/v1/query` returns
+`status=waiting_for_clarification` before SQL generation. Continue the same graph thread with:
+
+```json
+POST /api/v1/query/{request_id}/clarify
+{
+  "answer": "按销售金额统计2025年前10名"
+}
+```
+
+The answer is merged into the effective question and checked again. The configured round limit
+prevents an endless clarification loop, and the original question remains unchanged in audit data.
 
 When a generated SQL statement is assessed as high risk, `/api/v1/query` returns
 `status=waiting_for_confirmation`, `requires_confirmation=true`, and a `request_id`

@@ -3,11 +3,17 @@ from typing import Any, TypedDict
 
 class TextToSQLGraphState(TypedDict, total=False):
     question: str
+    effective_question: str
     request_id: str
     schema_context: str
     sql: str
     explanation: str
     assumptions: list[str]
+    conversation_history: list[dict[str, str]]
+    clarification_question: str | None
+    clarification_options: list[str]
+    clarification_count: int
+    requires_clarification: bool
 
     columns: list[str]
     rows: list[dict[str, Any]]
@@ -29,6 +35,7 @@ class TextToSQLGraphState(TypedDict, total=False):
     status: str
 
     schema_processing_ms: float
+    clarification_llm_ms: float
     generation_llm_ms: float
     review_llm_ms: float
     repair_llm_ms: float

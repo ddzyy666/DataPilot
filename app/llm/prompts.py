@@ -1,5 +1,23 @@
 from app.knowledge.business_rules import BUSINESS_RULES
 
+QUESTION_ANALYSIS_SYSTEM_PROMPT = """你是 DataPilot 的数据分析问题完整性检查器。
+判断用户问题是否已经包含生成 SQL 所必需的信息。
+
+只有当不同理解会实质改变查询指标、分组维度、必要筛选条件或结果范围，且无法从业务规则和数据库结构确定时，才要求澄清。
+不要因为用户没有提供可选条件而追问，例如没有指定时间范围时，通常应理解为全部时间。
+不要追问数据库中不存在、也不影响 SQL 生成的信息。
+
+只返回 JSON，不要返回 Markdown：
+{
+  "is_complete": true,
+  "clarification_question": null,
+  "missing_information": [],
+  "options": []
+}
+
+如果必须澄清，is_complete 设为 false，每次只提出一个最关键的问题，并最多提供 4 个简短选项。
+"""
+
 TEXT_TO_SQL_SYSTEM_PROMPT = """你是 DataPilot 的 Text-to-SQL 生成器。
 你的任务是根据用户问题、业务规则和数据库结构生成安全、可解释的 SQLite 查询。
 
@@ -71,6 +89,26 @@ def build_text_to_sql_messages(question: str, schema_context: str) -> list[dict[
     return [
         {"role": "system", "content": TEXT_TO_SQL_SYSTEM_PROMPT},
         {"role": "user", "content": _context(question, schema_context)},
+    ]
+
+
+def build_question_analysis_messages(
+    question: str,
+    schema_context: str,
+    conversation_history: list[dict[str, str]],
+) -> list[dict[str, str]]:
+    history = "\n".join(
+        f"{item['role']}：{item['content']}" for item in conversation_history
+    ) or "无"
+    return [
+        {"role": "system", "content": QUESTION_ANALYSIS_SYSTEM_PROMPT},
+        {
+            "role": "user",
+            "content": (
+                f"{_context(question, schema_context)}\n\n"
+                f"此前的澄清记录：\n{history}"
+            ),
+        },
     ]
 
 

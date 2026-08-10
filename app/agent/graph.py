@@ -27,6 +27,8 @@ class LangGraphTextToSQLService:
         llm_client: OpenAICompatibleClient | None = None,
         target_engine: Engine = engine,
         enable_sql_review: bool | None = None,
+        enable_clarification: bool | None = None,
+        max_clarification_rounds: int | None = None,
         checkpoint_path: str | None = None,
     ) -> None:
         service_kwargs: dict[str, Any] = {
@@ -39,7 +41,20 @@ class LangGraphTextToSQLService:
         self.risk_assessor = SQLRiskAssessor(
             settings.query_require_confirmation_for_high_risk
         )
-        self.nodes = TextToSQLGraphNodes(self.service, self.risk_assessor)
+        self.nodes = TextToSQLGraphNodes(
+            self.service,
+            self.risk_assessor,
+            enable_clarification=(
+                settings.query_enable_clarification
+                if enable_clarification is None
+                else enable_clarification
+            ),
+            max_clarification_rounds=(
+                settings.query_max_clarification_rounds
+                if max_clarification_rounds is None
+                else max_clarification_rounds
+            ),
+        )
         self.checkpoint_path = checkpoint_path
         self._checkpoint_connection: aiosqlite.Connection | None = None
         self._graph: Any | None = None
@@ -69,6 +84,8 @@ class LangGraphTextToSQLService:
     def _build_graph(self, checkpointer):
         builder = StateGraph(TextToSQLGraphState)
         builder.add_node("load_schema", self.nodes.load_schema)
+        builder.add_node("analyze_question", self.nodes.analyze_question)
+        builder.add_node("clarify_question", self.nodes.clarify_question)
         builder.add_node("generate_sql", self.nodes.generate_sql)
         builder.add_node("review_sql", self.nodes.review_sql)
         builder.add_node("assess_risk", self.nodes.assess_risk)
@@ -79,7 +96,13 @@ class LangGraphTextToSQLService:
         builder.add_node("raise_execution_error", self.nodes.raise_execution_error)
 
         builder.add_edge(START, "load_schema")
-        builder.add_edge("load_schema", "generate_sql")
+        builder.add_edge("load_schema", "analyze_question")
+        builder.add_conditional_edges(
+            "analyze_question",
+            self.nodes.route_after_question_analysis,
+            {"clarify": "clarify_question", "generate": "generate_sql"},
+        )
+        builder.add_edge("clarify_question", "analyze_question")
         builder.add_conditional_edges(
             "generate_sql",
             self.nodes.route_after_generation,
@@ -118,6 +141,12 @@ class LangGraphTextToSQLService:
             {
                 "request_id": thread_id,
                 "question": question,
+                "effective_question": question,
+                "conversation_history": [],
+                "clarification_question": None,
+                "clarification_options": [],
+                "clarification_count": 0,
+                "requires_clarification": False,
                 "repair_attempts": 0,
                 "reviewed": False,
                 "review_passed": None,
@@ -130,11 +159,24 @@ class LangGraphTextToSQLService:
                 "risk_reasons": [],
                 "requires_confirmation": False,
                 "generation_llm_ms": 0.0,
+                "clarification_llm_ms": 0.0,
                 "review_llm_ms": 0.0,
                 "repair_llm_ms": 0.0,
                 "sql_execution_ms": 0.0,
             },
             config=self._thread_config(thread_id),
+        )
+        return self._to_response(state, started_at)
+
+    async def clarify(self, request_id: str, *, answer: str) -> QueryResponse:
+        graph = await self._ensure_graph()
+        snapshot = await graph.aget_state(self._thread_config(request_id))
+        if not snapshot.values or "clarify_question" not in snapshot.next:
+            raise ValueError("没有找到等待澄清的查询，或该查询已经处理。")
+        started_at = perf_counter()
+        state = await graph.ainvoke(
+            Command(resume={"answer": answer}),
+            config=self._thread_config(request_id),
         )
         return self._to_response(state, started_at)
 
@@ -168,16 +210,23 @@ class LangGraphTextToSQLService:
 
     def _to_response(self, state: dict[str, Any], started_at: float) -> QueryResponse:
         interrupted = bool(state.get("__interrupt__"))
-        status = "waiting_for_confirmation" if interrupted else state.get("status", "completed")
-        total_ms = round((perf_counter() - started_at) * 1000, 2)
+        if interrupted and state.get("requires_clarification"):
+            status = "waiting_for_clarification"
+        elif interrupted:
+            status = "waiting_for_confirmation"
+        else:
+            status = state.get("status", "completed")
+        invocation_ms = round((perf_counter() - started_at) * 1000, 2)
         llm_total_ms = round(
-            state.get("generation_llm_ms", 0.0)
+            state.get("clarification_llm_ms", 0.0)
+            + state.get("generation_llm_ms", 0.0)
             + state.get("review_llm_ms", 0.0)
             + state.get("repair_llm_ms", 0.0),
             2,
         )
         schema_ms = state.get("schema_processing_ms", 0.0)
         sql_ms = state.get("sql_execution_ms", 0.0)
+        total_ms = round(max(invocation_ms, llm_total_ms + schema_ms + sql_ms), 2)
         other_ms = round(max(0.0, total_ms - llm_total_ms - schema_ms - sql_ms), 2)
 
         return QueryResponse(
@@ -185,7 +234,11 @@ class LangGraphTextToSQLService:
             status=status,
             risk_level=state.get("risk_level", "low"),
             risk_reasons=state.get("risk_reasons", []),
-            requires_confirmation=interrupted,
+            requires_confirmation=bool(state.get("requires_confirmation")),
+            requires_clarification=bool(state.get("requires_clarification")),
+            clarification_question=state.get("clarification_question"),
+            clarification_options=state.get("clarification_options", []),
+            clarification_count=state.get("clarification_count", 0),
             question=state.get("question", ""),
             sql=state.get("sql", ""),
             explanation=state.get("explanation", ""),

@@ -89,6 +89,8 @@ async def run_benchmark(cases: list[dict[str, Any]]) -> dict[str, Any]:
                     "passed": passed,
                     "generated_sql": response.sql,
                     "actual_rows": response.rows,
+                    "status": response.status,
+                    "clarification_question": response.clarification_question,
                     "was_review_corrected": response.was_review_corrected,
                     "was_repaired": response.was_repaired,
                     "timings": response.timings.model_dump(),

@@ -6,6 +6,7 @@ from langgraph.types import interrupt
 from app.agent.state import TextToSQLGraphState
 from app.db.metadata import inspect_schema
 from app.llm.prompts import (
+    build_question_analysis_messages,
     build_sql_repair_messages,
     build_sql_review_messages,
     build_text_to_sql_messages,
@@ -17,9 +18,18 @@ from app.services.text_to_sql import TextToSQLService
 
 
 class TextToSQLGraphNodes:
-    def __init__(self, service: TextToSQLService, risk_assessor: SQLRiskAssessor) -> None:
+    def __init__(
+        self,
+        service: TextToSQLService,
+        risk_assessor: SQLRiskAssessor,
+        *,
+        enable_clarification: bool,
+        max_clarification_rounds: int,
+    ) -> None:
         self.service = service
         self.risk_assessor = risk_assessor
+        self.enable_clarification = enable_clarification
+        self.max_clarification_rounds = max(0, max_clarification_rounds)
 
     async def load_schema(self, state: TextToSQLGraphState) -> dict:
         started_at = perf_counter()
@@ -31,8 +41,96 @@ class TextToSQLGraphNodes:
             "schema_processing_ms": self._elapsed_ms(started_at),
         }
 
+    async def analyze_question(self, state: TextToSQLGraphState) -> dict:
+        if not self.enable_clarification or self.max_clarification_rounds == 0:
+            return {
+                "requires_clarification": False,
+                "clarification_question": None,
+                "clarification_options": [],
+            }
+
+        messages = build_question_analysis_messages(
+            state["effective_question"],
+            state["schema_context"],
+            state.get("conversation_history", []),
+        )
+        started_at = perf_counter()
+        raw_content = await self.service.llm_client.complete(messages)
+        elapsed_ms = self._elapsed_ms(started_at)
+        payload = self.service._parse_model_json(raw_content)
+        if not isinstance(payload.get("is_complete"), bool):
+            raise TypeError("问题完整性分析器没有返回合法的 is_complete 字段。")
+
+        options = payload.get("options", [])
+        if not isinstance(options, list):
+            raise TypeError("问题完整性分析器没有返回合法的 options 字段。")
+        clarification_question = str(
+            payload.get("clarification_question") or ""
+        ).strip()
+        can_clarify = (
+            not payload["is_complete"]
+            and state.get("clarification_count", 0) < self.max_clarification_rounds
+        )
+        if can_clarify and not clarification_question:
+            raise ValueError("问题完整性分析器要求澄清，但没有返回澄清问题。")
+        return {
+            "requires_clarification": can_clarify,
+            "clarification_question": clarification_question if can_clarify else None,
+            "clarification_options": (
+                [str(item) for item in options[:4]] if can_clarify else []
+            ),
+            "clarification_llm_ms": round(
+                state.get("clarification_llm_ms", 0.0) + elapsed_ms,
+                2,
+            ),
+        }
+
+    async def clarify_question(self, state: TextToSQLGraphState) -> dict:
+        decision = interrupt(
+            {
+                "request_id": state["request_id"],
+                "question": state["question"],
+                "clarification_question": state["clarification_question"],
+                "options": state.get("clarification_options", []),
+                "message": "需要补充信息后才能准确生成SQL。",
+            }
+        )
+        if not isinstance(decision, dict):
+            raise TypeError("澄清结果必须是包含 answer 字段的对象。")
+        answer = str(decision.get("answer") or "").strip()
+        if not answer:
+            raise ValueError("澄清回答不能为空。")
+
+        history = [*state.get("conversation_history", [])]
+        history.extend(
+            [
+                {
+                    "role": "assistant",
+                    "content": state.get("clarification_question") or "",
+                },
+                {"role": "user", "content": answer},
+            ]
+        )
+        user_answers = [
+            item["content"] for item in history if item.get("role") == "user"
+        ]
+        effective_question = state["question"]
+        if user_answers:
+            effective_question += "\n用户补充信息：" + "；".join(user_answers)
+        return {
+            "effective_question": effective_question,
+            "conversation_history": history,
+            "clarification_count": state.get("clarification_count", 0) + 1,
+            "requires_clarification": False,
+            "clarification_question": None,
+            "clarification_options": [],
+            "status": "completed",
+        }
+
     async def generate_sql(self, state: TextToSQLGraphState) -> dict:
-        messages = build_text_to_sql_messages(state["question"], state["schema_context"])
+        messages = build_text_to_sql_messages(
+            state["effective_question"], state["schema_context"]
+        )
         started_at = perf_counter()
         raw_content = await self.service.llm_client.complete(messages)
         elapsed_ms = self._elapsed_ms(started_at)
@@ -51,7 +149,7 @@ class TextToSQLGraphNodes:
 
     async def review_sql(self, state: TextToSQLGraphState) -> dict:
         messages = build_sql_review_messages(
-            state["question"],
+            state["effective_question"],
             state["schema_context"],
             state["sql"],
         )
@@ -174,7 +272,7 @@ class TextToSQLGraphNodes:
 
     async def repair_sql(self, state: TextToSQLGraphState) -> dict:
         messages = build_sql_repair_messages(
-            question=state["question"],
+            question=state["effective_question"],
             schema_context=state["schema_context"],
             failed_sql=state["sql"],
             database_error=state["execution_error"] or "未知数据库错误",
@@ -206,6 +304,11 @@ class TextToSQLGraphNodes:
 
     def route_after_generation(self, state: TextToSQLGraphState) -> Literal["review", "execute"]:
         return "review" if self.service.enable_sql_review else "execute"
+
+    def route_after_question_analysis(
+        self, state: TextToSQLGraphState
+    ) -> Literal["clarify", "generate"]:
+        return "clarify" if state.get("requires_clarification") else "generate"
 
     def route_after_execution(self, state: TextToSQLGraphState) -> Literal[
         "success", "repair", "failed"

@@ -21,6 +21,15 @@ class QueryConfirmationRequest(BaseModel):
     )
 
 
+class QueryClarificationRequest(BaseModel):
+    answer: str = Field(
+        ...,
+        min_length=1,
+        max_length=500,
+        description="用户对澄清问题的补充回答",
+    )
+
+
 class StageTimings(BaseModel):
     schema_processing_ms: float = Field(default=0, description="读取并格式化数据库结构耗时")
     llm_total_ms: float = Field(default=0, description="所有模型调用的累计耗时")
@@ -31,7 +40,12 @@ class StageTimings(BaseModel):
 
 class QueryResponse(BaseModel):
     request_id: str = Field(default="", description="请求追踪ID")
-    status: Literal["completed", "waiting_for_confirmation", "rejected"] = Field(
+    status: Literal[
+        "completed",
+        "waiting_for_clarification",
+        "waiting_for_confirmation",
+        "rejected",
+    ] = Field(
         default="completed",
         description="Agent当前状态",
     )
@@ -41,6 +55,13 @@ class QueryResponse(BaseModel):
     )
     risk_reasons: list[str] = Field(default_factory=list, description="SQL风险原因")
     requires_confirmation: bool = Field(default=False, description="是否需要人工确认")
+    requires_clarification: bool = Field(default=False, description="是否需要用户补充信息")
+    clarification_question: str | None = Field(default=None, description="需要用户回答的问题")
+    clarification_options: list[str] = Field(
+        default_factory=list,
+        description="可选的参考答案；用户也可以自由输入",
+    )
+    clarification_count: int = Field(default=0, description="已经完成的澄清轮数")
     question: str = Field(description="原始用户问题")
     sql: str = Field(description="生成的只读 SQL")
     explanation: str = Field(description="SQL 思路说明")
