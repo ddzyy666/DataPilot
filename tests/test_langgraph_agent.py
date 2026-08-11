@@ -88,6 +88,29 @@ class ClarificationFakeLLMClient(OpenAICompatibleClient):
         """
 
 
+class ResultAnalysisFakeLLMClient(OpenAICompatibleClient):
+    def __init__(self, invalid_analysis: bool = False) -> None:
+        self.invalid_analysis = invalid_analysis
+
+    async def complete(self, messages: list[dict[str, str]]) -> str:
+        if "查询结果解读器" in messages[0]["content"]:
+            if self.invalid_analysis:
+                return "not-json"
+            return """
+            {
+              "summary": "当前共有0条订单记录。",
+              "insights": ["订单数量为0"]
+            }
+            """
+        return """
+        {
+          "sql": "SELECT COUNT(*) AS order_count FROM orders",
+          "explanation": "统计订单总数。",
+          "assumptions": []
+        }
+        """
+
+
 @pytest.mark.anyio
 async def test_langgraph_wraps_existing_services_and_returns_query_response() -> None:
     test_engine = create_engine("sqlite://")
@@ -97,6 +120,7 @@ async def test_langgraph_wraps_existing_services_and_returns_query_response() ->
         target_engine=test_engine,
         enable_sql_review=False,
         enable_clarification=False,
+        enable_result_analysis=False,
     )
 
     response = await service.generate("统计不同订单状态的订单数量")
@@ -117,6 +141,7 @@ async def test_langgraph_routes_execution_failure_to_repair_node() -> None:
         target_engine=test_engine,
         enable_sql_review=False,
         enable_clarification=False,
+        enable_result_analysis=False,
     )
 
     response = await service.generate("查询订单状态")
@@ -132,6 +157,7 @@ def test_langgraph_contains_expected_business_nodes() -> None:
         llm_client=GraphFakeLLMClient(),
         enable_sql_review=False,
         enable_clarification=False,
+        enable_result_analysis=False,
     )
 
     node_names = set(service.graph.get_graph().nodes)
@@ -146,6 +172,7 @@ def test_langgraph_contains_expected_business_nodes() -> None:
         "human_approval",
         "reject_query",
         "execute_sql",
+        "analyze_result",
         "repair_sql",
         "raise_execution_error",
     }.issubset(node_names)
@@ -160,6 +187,7 @@ async def test_high_risk_sql_pauses_then_resumes_after_approval() -> None:
         target_engine=test_engine,
         enable_sql_review=False,
         enable_clarification=False,
+        enable_result_analysis=False,
     )
 
     pending = await service.generate("按订单状态排名", request_id="approval-test")
@@ -185,6 +213,7 @@ async def test_high_risk_sql_can_be_rejected() -> None:
         target_engine=test_engine,
         enable_sql_review=False,
         enable_clarification=False,
+        enable_result_analysis=False,
     )
     await service.generate("按订单状态排名", request_id="reject-test")
 
@@ -204,6 +233,7 @@ async def test_sqlite_checkpoint_can_resume_after_service_restart(tmp_path) -> N
         target_engine=test_engine,
         enable_sql_review=False,
         enable_clarification=False,
+        enable_result_analysis=False,
         checkpoint_path=checkpoint_path,
     )
     pending = await first_service.generate("按订单状态排名", request_id="restart-test")
@@ -214,6 +244,7 @@ async def test_sqlite_checkpoint_can_resume_after_service_restart(tmp_path) -> N
         target_engine=test_engine,
         enable_sql_review=False,
         enable_clarification=False,
+        enable_result_analysis=False,
         checkpoint_path=checkpoint_path,
     )
     completed = await second_service.resume("restart-test", approved=True)
@@ -229,6 +260,7 @@ async def test_resume_rejects_unknown_request_id() -> None:
         llm_client=HighRiskFakeLLMClient(),
         enable_sql_review=False,
         enable_clarification=False,
+        enable_result_analysis=False,
     )
 
     with pytest.raises(ValueError, match="没有找到等待人工确认"):
@@ -245,6 +277,7 @@ async def test_ambiguous_question_pauses_and_continues_after_clarification() -> 
         target_engine=test_engine,
         enable_sql_review=False,
         enable_clarification=True,
+        enable_result_analysis=False,
     )
 
     pending = await service.generate("销量最好的产品", request_id="clarify-test")
@@ -272,6 +305,7 @@ async def test_clarification_stops_after_configured_maximum_rounds() -> None:
         target_engine=test_engine,
         enable_sql_review=False,
         enable_clarification=True,
+        enable_result_analysis=False,
         max_clarification_rounds=1,
     )
     await service.generate("销量最好的产品", request_id="max-round-test")
@@ -293,6 +327,7 @@ async def test_clarification_checkpoint_survives_service_restart(tmp_path) -> No
         target_engine=test_engine,
         enable_sql_review=False,
         enable_clarification=True,
+        enable_result_analysis=False,
         checkpoint_path=checkpoint_path,
     )
     pending = await first_service.generate("销量最好的产品", request_id="clarify-restart")
@@ -303,6 +338,7 @@ async def test_clarification_checkpoint_survives_service_restart(tmp_path) -> No
         target_engine=test_engine,
         enable_sql_review=False,
         enable_clarification=True,
+        enable_result_analysis=False,
         checkpoint_path=checkpoint_path,
     )
     completed = await second_service.clarify(
@@ -312,6 +348,48 @@ async def test_clarification_checkpoint_survives_service_restart(tmp_path) -> No
 
     assert pending.status == "waiting_for_clarification"
     assert completed.status == "completed"
+
+
+@pytest.mark.anyio
+async def test_result_analysis_returns_summary_profile_and_chart() -> None:
+    test_engine = create_engine("sqlite://")
+    Base.metadata.create_all(test_engine)
+    service = LangGraphTextToSQLService(
+        llm_client=ResultAnalysisFakeLLMClient(),
+        target_engine=test_engine,
+        enable_sql_review=False,
+        enable_clarification=False,
+        enable_result_analysis=True,
+    )
+
+    response = await service.generate("一共有多少订单？")
+
+    assert response.result_summary == "当前共有0条订单记录。"
+    assert response.insights == ["订单数量为0"]
+    assert response.data_profile["numeric_summary"]["order_count"]["sum"] == 0
+    assert response.chart is not None
+    assert response.chart.type == "metric"
+    assert response.result_analysis_error is None
+
+
+@pytest.mark.anyio
+async def test_result_analysis_failure_does_not_discard_sql_result() -> None:
+    test_engine = create_engine("sqlite://")
+    Base.metadata.create_all(test_engine)
+    service = LangGraphTextToSQLService(
+        llm_client=ResultAnalysisFakeLLMClient(invalid_analysis=True),
+        target_engine=test_engine,
+        enable_sql_review=False,
+        enable_clarification=False,
+        enable_result_analysis=True,
+    )
+
+    response = await service.generate("一共有多少订单？")
+
+    assert response.status == "completed"
+    assert response.rows == [{"order_count": 0}]
+    assert response.result_summary == "查询执行成功，共返回 1 行数据。"
+    assert response.result_analysis_error == "结果分析器没有返回合法 JSON。"
 
 
 def test_runtime_factory_selects_langgraph(monkeypatch: pytest.MonkeyPatch) -> None:

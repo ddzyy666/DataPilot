@@ -1,3 +1,6 @@
+import json
+from typing import Any
+
 from app.knowledge.business_rules import BUSINESS_RULES
 
 QUESTION_ANALYSIS_SYSTEM_PROMPT = """你是 DataPilot 的数据分析问题完整性检查器。
@@ -16,6 +19,24 @@ QUESTION_ANALYSIS_SYSTEM_PROMPT = """你是 DataPilot 的数据分析问题完�
 }
 
 如果必须澄清，is_complete 设为 false，每次只提出一个最关键的问题，并最多提供 4 个简短选项。
+"""
+
+RESULT_ANALYSIS_SYSTEM_PROMPT = """你是 DataPilot 的查询结果解读器。
+根据用户问题、SQL、程序计算的数据画像和结果样本，生成简洁的中文结论。
+
+要求：
+1. 只能引用输入中明确存在的数据，不得编造原因、趋势或业务背景。
+2. 数值以程序给出的 numeric_summary 和结果样本为准，不要自行重新计算。
+3. 如果结果被截断，必须提醒结论只基于当前返回数据。
+4. summary 用一到两句话回答用户问题。
+5. insights 最多返回三条；没有可靠洞察时返回空数组。
+6. 只返回 JSON，不要返回 Markdown。
+
+JSON 格式：
+{
+  "summary": "查询结果总结",
+  "insights": ["关键发现1", "关键发现2"]
+}
 """
 
 TEXT_TO_SQL_SYSTEM_PROMPT = """你是 DataPilot 的 Text-to-SQL 生成器。
@@ -107,6 +128,29 @@ def build_question_analysis_messages(
             "content": (
                 f"{_context(question, schema_context)}\n\n"
                 f"此前的澄清记录：\n{history}"
+            ),
+        },
+    ]
+
+
+def build_result_analysis_messages(
+    *,
+    question: str,
+    sql: str,
+    profile: dict[str, Any],
+    sample_rows: list[dict[str, Any]],
+) -> list[dict[str, str]]:
+    return [
+        {"role": "system", "content": RESULT_ANALYSIS_SYSTEM_PROMPT},
+        {
+            "role": "user",
+            "content": (
+                f"用户问题：{question}\n\n"
+                f"已执行SQL：\n{sql}\n\n"
+                "程序计算的数据画像：\n"
+                f"{json.dumps(profile, ensure_ascii=False, default=str)}\n\n"
+                "查询结果样本：\n"
+                f"{json.dumps(sample_rows, ensure_ascii=False, default=str)}"
             ),
         },
     ]

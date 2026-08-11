@@ -38,6 +38,16 @@ class StageTimings(BaseModel):
     total_ms: float = Field(default=0, description="完整请求处理耗时")
 
 
+class ChartRecommendation(BaseModel):
+    type: Literal["metric", "bar", "line", "pie", "table"] = Field(
+        description="推荐的展示类型"
+    )
+    title: str = Field(description="建议的图表标题")
+    x_field: str | None = Field(default=None, description="横轴或分类字段")
+    y_fields: list[str] = Field(default_factory=list, description="数值指标字段")
+    reason: str = Field(description="推荐该图表的原因")
+
+
 class QueryResponse(BaseModel):
     request_id: str = Field(default="", description="请求追踪ID")
     status: Literal[
@@ -71,6 +81,17 @@ class QueryResponse(BaseModel):
     rows: list[dict[str, Any]] = Field(default_factory=list, description="查询结果数据")
     row_count: int = Field(default=0, description="本次实际返回的数据行数")
     truncated: bool = Field(default=False, description="结果是否因行数限制被截断")
+    result_summary: str = Field(default="", description="查询结果的中文总结")
+    insights: list[str] = Field(default_factory=list, description="查询结果中的关键发现")
+    chart: ChartRecommendation | None = Field(default=None, description="图表展示建议")
+    data_profile: dict[str, Any] = Field(
+        default_factory=dict,
+        description="由程序计算的结果数据画像",
+    )
+    result_analysis_error: str | None = Field(
+        default=None,
+        description="结果解读失败时的降级信息，不影响SQL查询结果",
+    )
     execution_time_ms: float = Field(default=0, description="SQL 执行耗时（毫秒）")
     was_repaired: bool = Field(default=False, description="SQL 是否经过模型自动修复")
     repair_attempts: int = Field(default=0, description="SQL 自动修复次数")

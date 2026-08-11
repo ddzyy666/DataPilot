@@ -19,6 +19,11 @@ class TextToSQLGraphState(TypedDict, total=False):
     rows: list[dict[str, Any]]
     row_count: int
     truncated: bool
+    result_summary: str
+    insights: list[str]
+    chart: dict[str, Any] | None
+    data_profile: dict[str, Any]
+    result_analysis_error: str | None
 
     reviewed: bool
     review_passed: bool | None
@@ -39,4 +44,5 @@ class TextToSQLGraphState(TypedDict, total=False):
     generation_llm_ms: float
     review_llm_ms: float
     repair_llm_ms: float
+    result_analysis_llm_ms: float
     sql_execution_ms: float

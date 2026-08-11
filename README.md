@@ -70,7 +70,7 @@ Useful endpoints:
 For SiliconFlow, a typical local `.env` configuration is:
 
 ```env
-AGENT_RUNTIME=legacy
+AGENT_RUNTIME=langgraph
 LLM_BASE_URL=https://api.siliconflow.cn/v1
 LLM_MODEL=Qwen/Qwen3-8B
 LLM_TIMEOUT_SECONDS=60
@@ -95,6 +95,8 @@ AGENT_RUNTIME=langgraph
 CHECKPOINT_DATABASE_PATH=./data/checkpoints.db
 QUERY_ENABLE_CLARIFICATION=true
 QUERY_MAX_CLARIFICATION_ROUNDS=2
+QUERY_ENABLE_RESULT_ANALYSIS=true
+QUERY_RESULT_ANALYSIS_MAX_ROWS=20
 QUERY_REQUIRE_CONFIRMATION_FOR_HIGH_RISK=true
 ```
 
@@ -126,3 +128,30 @@ POST /api/v1/query/{request_id}/confirm
 Set `approved` to `false` to reject it. `edited_sql` may contain a manually corrected
 statement; it is still checked by the readonly and table/column permission policies.
 The SQLite checkpointer keeps interrupted graph state across process restarts.
+
+After a successful query, the `analyze_result` node returns a Chinese summary, up to three
+insights, a deterministic data profile, and a chart recommendation. Numeric facts such as
+minimum, maximum, sum, and average are calculated in Python rather than by the model. Only
+the configured number of result rows are sent to the LLM. If narrative generation fails, the
+SQL rows and chart recommendation are still returned with `result_analysis_error` populated.
+
+## Frontend dashboard
+
+The React dashboard renders metric cards, bar charts, line charts, result tables, data profiles,
+clarification prompts, and high-risk SQL approval controls. Start the backend first:
+
+```powershell
+conda activate text2sql-agent
+python -m uvicorn app.main:app --reload
+```
+
+Then start the frontend in another terminal:
+
+```powershell
+cd frontend
+npm.cmd install
+npm.cmd run dev
+```
+
+Open `http://localhost:5173`. Vite proxies `/api` requests to the FastAPI service at
+`http://127.0.0.1:8000`, so no additional CORS configuration is required in development.

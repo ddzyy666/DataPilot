@@ -5,12 +5,14 @@ from langgraph.types import interrupt
 
 from app.agent.state import TextToSQLGraphState
 from app.db.metadata import inspect_schema
+from app.llm.client import LLMConfigurationError, LLMResponseError
 from app.llm.prompts import (
     build_question_analysis_messages,
     build_sql_repair_messages,
     build_sql_review_messages,
     build_text_to_sql_messages,
 )
+from app.services.result_analyzer import ResultAnalyzer
 from app.services.schema_formatter import format_schema_for_prompt
 from app.services.sql_executor import SQLExecutionError
 from app.services.sql_risk import SQLRiskAssessor
@@ -25,11 +27,18 @@ class TextToSQLGraphNodes:
         *,
         enable_clarification: bool,
         max_clarification_rounds: int,
+        enable_result_analysis: bool,
+        result_analysis_max_rows: int,
     ) -> None:
         self.service = service
         self.risk_assessor = risk_assessor
         self.enable_clarification = enable_clarification
         self.max_clarification_rounds = max(0, max_clarification_rounds)
+        self.enable_result_analysis = enable_result_analysis
+        self.result_analyzer = ResultAnalyzer(
+            service.llm_client,
+            max_rows_for_llm=result_analysis_max_rows,
+        )
 
     async def load_schema(self, state: TextToSQLGraphState) -> dict:
         started_at = perf_counter()
@@ -216,6 +225,61 @@ class TextToSQLGraphNodes:
             "execution_error": None,
             "sql_execution_ms": round(accumulated_ms + result.execution_time_ms, 2),
             "status": "completed",
+        }
+
+    async def analyze_result(self, state: TextToSQLGraphState) -> dict:
+        profile = self.result_analyzer.build_profile(
+            state.get("columns", []),
+            state.get("rows", []),
+            truncated=state.get("truncated", False),
+        )
+        chart = self.result_analyzer.recommend_chart(
+            state.get("columns", []),
+            state.get("rows", []),
+        )
+        if not self.enable_result_analysis:
+            return {
+                "result_summary": self.result_analyzer.fallback_summary(
+                    state.get("row_count", 0)
+                ),
+                "insights": [],
+                "chart": chart,
+                "data_profile": profile,
+                "result_analysis_error": None,
+            }
+
+        started_at = perf_counter()
+        try:
+            narrative = await self.result_analyzer.analyze_narrative(
+                question=state["effective_question"],
+                sql=state["sql"],
+                columns=state.get("columns", []),
+                rows=state.get("rows", []),
+                profile=profile,
+            )
+        except (
+            LLMConfigurationError,
+            LLMResponseError,
+            ValueError,
+            TypeError,
+        ) as exc:
+            return {
+                "result_summary": self.result_analyzer.fallback_summary(
+                    state.get("row_count", 0)
+                ),
+                "insights": [],
+                "chart": chart,
+                "data_profile": profile,
+                "result_analysis_error": str(exc),
+                "result_analysis_llm_ms": self._elapsed_ms(started_at),
+            }
+        return {
+            "result_summary": narrative.summary,
+            "insights": narrative.insights,
+            "chart": chart,
+            "data_profile": profile,
+            "result_analysis_error": None,
+            "result_analysis_llm_ms": self._elapsed_ms(started_at),
         }
 
     async def assess_risk(self, state: TextToSQLGraphState) -> dict:

@@ -29,6 +29,8 @@ class LangGraphTextToSQLService:
         enable_sql_review: bool | None = None,
         enable_clarification: bool | None = None,
         max_clarification_rounds: int | None = None,
+        enable_result_analysis: bool | None = None,
+        result_analysis_max_rows: int | None = None,
         checkpoint_path: str | None = None,
     ) -> None:
         service_kwargs: dict[str, Any] = {
@@ -53,6 +55,16 @@ class LangGraphTextToSQLService:
                 settings.query_max_clarification_rounds
                 if max_clarification_rounds is None
                 else max_clarification_rounds
+            ),
+            enable_result_analysis=(
+                settings.query_enable_result_analysis
+                if enable_result_analysis is None
+                else enable_result_analysis
+            ),
+            result_analysis_max_rows=(
+                settings.query_result_analysis_max_rows
+                if result_analysis_max_rows is None
+                else result_analysis_max_rows
             ),
         )
         self.checkpoint_path = checkpoint_path
@@ -92,6 +104,7 @@ class LangGraphTextToSQLService:
         builder.add_node("human_approval", self.nodes.human_approval)
         builder.add_node("reject_query", self.nodes.reject_query)
         builder.add_node("execute_sql", self.nodes.execute_sql)
+        builder.add_node("analyze_result", self.nodes.analyze_result)
         builder.add_node("repair_sql", self.nodes.repair_sql)
         builder.add_node("raise_execution_error", self.nodes.raise_execution_error)
 
@@ -124,11 +137,12 @@ class LangGraphTextToSQLService:
             "execute_sql",
             self.nodes.route_after_execution,
             {
-                "success": END,
+                "success": "analyze_result",
                 "repair": "repair_sql",
                 "failed": "raise_execution_error",
             },
         )
+        builder.add_edge("analyze_result", END)
         builder.add_edge("repair_sql", "assess_risk")
         builder.add_edge("raise_execution_error", END)
         return builder.compile(checkpointer=checkpointer)
@@ -162,6 +176,7 @@ class LangGraphTextToSQLService:
                 "clarification_llm_ms": 0.0,
                 "review_llm_ms": 0.0,
                 "repair_llm_ms": 0.0,
+                "result_analysis_llm_ms": 0.0,
                 "sql_execution_ms": 0.0,
             },
             config=self._thread_config(thread_id),
@@ -221,7 +236,8 @@ class LangGraphTextToSQLService:
             state.get("clarification_llm_ms", 0.0)
             + state.get("generation_llm_ms", 0.0)
             + state.get("review_llm_ms", 0.0)
-            + state.get("repair_llm_ms", 0.0),
+            + state.get("repair_llm_ms", 0.0)
+            + state.get("result_analysis_llm_ms", 0.0),
             2,
         )
         schema_ms = state.get("schema_processing_ms", 0.0)
@@ -248,6 +264,11 @@ class LangGraphTextToSQLService:
             rows=state.get("rows", []),
             row_count=state.get("row_count", 0),
             truncated=state.get("truncated", False),
+            result_summary=state.get("result_summary", ""),
+            insights=state.get("insights", []),
+            chart=state.get("chart"),
+            data_profile=state.get("data_profile", {}),
+            result_analysis_error=state.get("result_analysis_error"),
             execution_time_ms=sql_ms,
             was_repaired=state.get("repair_attempts", 0) > 0,
             repair_attempts=state.get("repair_attempts", 0),
