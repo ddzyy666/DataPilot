@@ -129,6 +129,16 @@ Set `approved` to `false` to reject it. `edited_sql` may contain a manually corr
 statement; it is still checked by the readonly and table/column permission policies.
 The SQLite checkpointer keeps interrupted graph state across process restarts.
 
+## Business semantic layer
+
+The structured semantic catalog maps user wording to standard metrics and dimensions before SQL
+generation. Each metric can define aliases, an authoritative SQL expression, required tables,
+default filters, a time field, output naming, and calculation notes. Dimensions define business
+fields and grouping expressions. The `resolve_semantics` graph node selects only relevant entries
+and JOIN relationships, then supplies the same semantic context to question clarification, SQL
+generation, semantic review, and repair. API responses expose `matched_metrics`,
+`matched_dimensions`, and `semantic_context` for debugging and explainability.
+
 After a successful query, the `analyze_result` node returns a Chinese summary, up to three
 insights, a deterministic data profile, and a chart recommendation. Numeric facts such as
 minimum, maximum, sum, and average are calculated in Python rather than by the model. Only

@@ -14,6 +14,7 @@ from app.llm.prompts import (
 )
 from app.services.result_analyzer import ResultAnalyzer
 from app.services.schema_formatter import format_schema_for_prompt
+from app.services.semantic_layer import SemanticLayer
 from app.services.sql_executor import SQLExecutionError
 from app.services.sql_risk import SQLRiskAssessor
 from app.services.text_to_sql import TextToSQLService
@@ -39,6 +40,7 @@ class TextToSQLGraphNodes:
             service.llm_client,
             max_rows_for_llm=result_analysis_max_rows,
         )
+        self.semantic_layer = SemanticLayer()
 
     async def load_schema(self, state: TextToSQLGraphState) -> dict:
         started_at = perf_counter()
@@ -48,6 +50,14 @@ class TextToSQLGraphNodes:
         return {
             "schema_context": format_schema_for_prompt(schema),
             "schema_processing_ms": self._elapsed_ms(started_at),
+        }
+
+    async def resolve_semantics(self, state: TextToSQLGraphState) -> dict:
+        match = self.semantic_layer.match(state["effective_question"])
+        return {
+            "semantic_context": self.semantic_layer.format_for_prompt(match),
+            "matched_metrics": match.metric_keys,
+            "matched_dimensions": match.dimension_keys,
         }
 
     async def analyze_question(self, state: TextToSQLGraphState) -> dict:
@@ -62,6 +72,7 @@ class TextToSQLGraphNodes:
             state["effective_question"],
             state["schema_context"],
             state.get("conversation_history", []),
+            state.get("semantic_context", ""),
         )
         started_at = perf_counter()
         raw_content = await self.service.llm_client.complete(messages)
@@ -134,11 +145,16 @@ class TextToSQLGraphNodes:
             "clarification_question": None,
             "clarification_options": [],
             "status": "completed",
+            "semantic_context": "",
+            "matched_metrics": [],
+            "matched_dimensions": [],
         }
 
     async def generate_sql(self, state: TextToSQLGraphState) -> dict:
         messages = build_text_to_sql_messages(
-            state["effective_question"], state["schema_context"]
+            state["effective_question"],
+            state["schema_context"],
+            state.get("semantic_context", ""),
         )
         started_at = perf_counter()
         raw_content = await self.service.llm_client.complete(messages)
@@ -161,6 +177,7 @@ class TextToSQLGraphNodes:
             state["effective_question"],
             state["schema_context"],
             state["sql"],
+            state.get("semantic_context", ""),
         )
         started_at = perf_counter()
         raw_content = await self.service.llm_client.complete(messages)
@@ -340,6 +357,7 @@ class TextToSQLGraphNodes:
             schema_context=state["schema_context"],
             failed_sql=state["sql"],
             database_error=state["execution_error"] or "未知数据库错误",
+            semantic_context=state.get("semantic_context", ""),
         )
         started_at = perf_counter()
         raw_content = await self.service.llm_client.complete(messages)

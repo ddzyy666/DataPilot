@@ -6,6 +6,9 @@ class TextToSQLGraphState(TypedDict, total=False):
     effective_question: str
     request_id: str
     schema_context: str
+    semantic_context: str
+    matched_metrics: list[str]
+    matched_dimensions: list[str]
     sql: str
     explanation: str
     assumptions: list[str]

@@ -98,18 +98,23 @@ JSON 格式：
 """
 
 
-def _context(question: str, schema_context: str) -> str:
+def _context(question: str, schema_context: str, semantic_context: str = "") -> str:
     return (
         f"业务规则如下：\n{BUSINESS_RULES}\n\n"
+        f"业务语义层如下：\n{semantic_context or '未提供专用语义定义。'}\n\n"
         f"数据库结构如下：\n{schema_context}\n\n"
         f"用户问题：{question}"
     )
 
 
-def build_text_to_sql_messages(question: str, schema_context: str) -> list[dict[str, str]]:
+def build_text_to_sql_messages(
+    question: str,
+    schema_context: str,
+    semantic_context: str = "",
+) -> list[dict[str, str]]:
     return [
         {"role": "system", "content": TEXT_TO_SQL_SYSTEM_PROMPT},
-        {"role": "user", "content": _context(question, schema_context)},
+        {"role": "user", "content": _context(question, schema_context, semantic_context)},
     ]
 
 
@@ -117,6 +122,7 @@ def build_question_analysis_messages(
     question: str,
     schema_context: str,
     conversation_history: list[dict[str, str]],
+    semantic_context: str = "",
 ) -> list[dict[str, str]]:
     history = "\n".join(
         f"{item['role']}：{item['content']}" for item in conversation_history
@@ -126,7 +132,7 @@ def build_question_analysis_messages(
         {
             "role": "user",
             "content": (
-                f"{_context(question, schema_context)}\n\n"
+                f"{_context(question, schema_context, semantic_context)}\n\n"
                 f"此前的澄清记录：\n{history}"
             ),
         },
@@ -161,13 +167,14 @@ def build_sql_repair_messages(
     schema_context: str,
     failed_sql: str,
     database_error: str,
+    semantic_context: str = "",
 ) -> list[dict[str, str]]:
     return [
         {"role": "system", "content": TEXT_TO_SQL_SYSTEM_PROMPT},
         {
             "role": "user",
             "content": (
-                f"{_context(question, schema_context)}\n\n"
+                f"{_context(question, schema_context, semantic_context)}\n\n"
                 f"上一次生成的 SQL：\n{failed_sql}\n\n"
                 f"数据库执行错误：\n{database_error}\n\n"
                 "请根据业务规则、数据库结构和错误原因修复 SQL，并按规定的 JSON 格式返回。"
@@ -180,11 +187,15 @@ def build_sql_review_messages(
     question: str,
     schema_context: str,
     candidate_sql: str,
+    semantic_context: str = "",
 ) -> list[dict[str, str]]:
     return [
         {"role": "system", "content": SQL_REVIEW_SYSTEM_PROMPT},
         {
             "role": "user",
-            "content": f"{_context(question, schema_context)}\n\n待审核 SQL：\n{candidate_sql}",
+            "content": (
+                f"{_context(question, schema_context, semantic_context)}\n\n"
+                f"待审核 SQL：\n{candidate_sql}"
+            ),
         },
     ]

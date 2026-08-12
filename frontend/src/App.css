@@ -69,6 +69,7 @@
 .profile-grid span { display: flex; justify-content: space-between; gap: 8px; color: #7b859b; background: #f7f8fb; border-radius: 7px; padding: 7px 8px; font-size: 11px; }
 .profile-grid b { color: #28334e; }
 .sql-card pre { color: #ced7ed; background: #152039; padding: 18px; border-radius: 12px; overflow-x: auto; line-height: 1.7; font-family: 'SFMono-Regular',Consolas,monospace; white-space: pre-wrap; }
+.semantic-tags { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 14px; padding-top: 14px; border-top: 1px solid #edf0f5; }
 .empty-state { min-height: 245px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #9ca8bd; }
 .empty-state > .anticon { font-size: 38px; color: #bec7d8; margin-bottom: 14px; }
 .empty-state h4 { color: #65718a !important; margin-bottom: 4px !important; }

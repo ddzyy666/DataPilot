@@ -16,6 +16,7 @@ from app.llm.prompts import (
 )
 from app.schemas.query import QueryResponse, StageTimings
 from app.services.schema_formatter import format_schema_for_prompt
+from app.services.semantic_layer import SemanticLayer
 from app.services.sql_executor import SQLExecutionError, SQLExecutor
 from app.services.sql_permissions import SQLPermissionPolicy
 
@@ -46,6 +47,7 @@ class TextToSQLService:
         )
         self.max_repair_attempts = settings.query_max_repair_attempts
         self.enable_sql_review = enable_sql_review
+        self.semantic_layer = SemanticLayer()
 
     async def generate(
         self, question: str, request_id: str | None = None
@@ -55,9 +57,11 @@ class TextToSQLService:
         schema_started_at = perf_counter()
         schema = self.permission_policy.filter_schema(inspect_schema(self.target_engine))
         schema_context = format_schema_for_prompt(schema)
+        semantic_match = self.semantic_layer.match(question)
+        semantic_context = self.semantic_layer.format_for_prompt(semantic_match)
         schema_processing_ms = self._elapsed_ms(schema_started_at)
 
-        messages = build_text_to_sql_messages(question, schema_context)
+        messages = build_text_to_sql_messages(question, schema_context, semantic_context)
 
         stage_started_at = perf_counter()
         raw_content = await self.llm_client.complete(messages)
@@ -78,7 +82,9 @@ class TextToSQLService:
         if self.enable_sql_review:
             reviewed = True
 
-            review_messages = build_sql_review_messages(question, schema_context, sql)
+            review_messages = build_sql_review_messages(
+                question, schema_context, sql, semantic_context
+            )
 
             stage_started_at = perf_counter()
             review_content = await self.llm_client.complete(review_messages)
@@ -142,6 +148,7 @@ class TextToSQLService:
                     schema_context=schema_context,
                     failed_sql=sql,
                     database_error=exc.database_error,
+                    semantic_context=semantic_context,
                 )
 
                 stage_started_at = perf_counter()
@@ -174,6 +181,9 @@ class TextToSQLService:
             explanation=str(payload.get("explanation", "")).strip(),
             assumptions=[str(item) for item in assumptions],
             schema_context=schema_context,
+            semantic_context=semantic_context,
+            matched_metrics=semantic_match.metric_keys,
+            matched_dimensions=semantic_match.dimension_keys,
             columns=execution.columns,
             rows=execution.rows,
             row_count=execution.row_count,

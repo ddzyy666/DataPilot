@@ -164,6 +164,7 @@ def test_langgraph_contains_expected_business_nodes() -> None:
 
     assert {
         "load_schema",
+        "resolve_semantics",
         "analyze_question",
         "clarify_question",
         "generate_sql",
@@ -176,6 +177,25 @@ def test_langgraph_contains_expected_business_nodes() -> None:
         "repair_sql",
         "raise_execution_error",
     }.issubset(node_names)
+
+
+@pytest.mark.anyio
+async def test_langgraph_exposes_matched_business_semantics() -> None:
+    test_engine = create_engine("sqlite://")
+    Base.metadata.create_all(test_engine)
+    service = LangGraphTextToSQLService(
+        llm_client=GraphFakeLLMClient(),
+        target_engine=test_engine,
+        enable_sql_review=False,
+        enable_clarification=False,
+        enable_result_analysis=False,
+    )
+
+    response = await service.generate("按订单状态统计订单数量")
+
+    assert response.matched_metrics == ["order_count"]
+    assert response.matched_dimensions == ["order_status"]
+    assert "订单数量" in response.semantic_context
 
 
 @pytest.mark.anyio

@@ -374,6 +374,17 @@ function App() {
                     {result.reviewed && <Tag color="blue">已语义审核</Tag>}
                     {result.was_repaired && <Tag color="purple">已自动修复</Tag>}
                   </Flex>
+                  {(result.matched_metrics?.length > 0 || result.matched_dimensions?.length > 0) && (
+                    <div className="semantic-tags">
+                      <Text type="secondary">语义层命中：</Text>
+                      {result.matched_metrics?.map((metric) => (
+                        <Tag color="geekblue" key={`metric-${metric}`}>指标 · {metric}</Tag>
+                      ))}
+                      {result.matched_dimensions?.map((dimension) => (
+                        <Tag color="cyan" key={`dimension-${dimension}`}>维度 · {dimension}</Tag>
+                      ))}
+                    </div>
+                  )}
                 </Card>
               </div>
             )}

@@ -96,6 +96,7 @@ class LangGraphTextToSQLService:
     def _build_graph(self, checkpointer):
         builder = StateGraph(TextToSQLGraphState)
         builder.add_node("load_schema", self.nodes.load_schema)
+        builder.add_node("resolve_semantics", self.nodes.resolve_semantics)
         builder.add_node("analyze_question", self.nodes.analyze_question)
         builder.add_node("clarify_question", self.nodes.clarify_question)
         builder.add_node("generate_sql", self.nodes.generate_sql)
@@ -109,13 +110,14 @@ class LangGraphTextToSQLService:
         builder.add_node("raise_execution_error", self.nodes.raise_execution_error)
 
         builder.add_edge(START, "load_schema")
-        builder.add_edge("load_schema", "analyze_question")
+        builder.add_edge("load_schema", "resolve_semantics")
+        builder.add_edge("resolve_semantics", "analyze_question")
         builder.add_conditional_edges(
             "analyze_question",
             self.nodes.route_after_question_analysis,
             {"clarify": "clarify_question", "generate": "generate_sql"},
         )
-        builder.add_edge("clarify_question", "analyze_question")
+        builder.add_edge("clarify_question", "resolve_semantics")
         builder.add_conditional_edges(
             "generate_sql",
             self.nodes.route_after_generation,
@@ -156,6 +158,9 @@ class LangGraphTextToSQLService:
                 "request_id": thread_id,
                 "question": question,
                 "effective_question": question,
+                "semantic_context": "",
+                "matched_metrics": [],
+                "matched_dimensions": [],
                 "conversation_history": [],
                 "clarification_question": None,
                 "clarification_options": [],
@@ -260,6 +265,9 @@ class LangGraphTextToSQLService:
             explanation=state.get("explanation", ""),
             assumptions=state.get("assumptions", []),
             schema_context=state.get("schema_context", ""),
+            semantic_context=state.get("semantic_context", ""),
+            matched_metrics=state.get("matched_metrics", []),
+            matched_dimensions=state.get("matched_dimensions", []),
             columns=state.get("columns", []),
             rows=state.get("rows", []),
             row_count=state.get("row_count", 0),
