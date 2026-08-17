@@ -1,0 +1,32 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      DATABASE_URL: sqlite:////app/data/datapilot.db
+      AUDIT_DATABASE_URL: sqlite:////app/data/audit.db
+      CHECKPOINT_DATABASE_PATH: /app/data/checkpoints.db
+    volumes:
+      - datapilot-data:/app/data
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+
+volumes:
+  datapilot-data:
