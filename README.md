@@ -206,8 +206,3 @@ datapilot-benchmark
 该项目定位为可演示、可扩展的工程化 MVP，而不是已经上线的大型数据平台。目前主要使用 SQLite 和
 静态语义目录，尚未实现认证、RBAC、多租户、多数据源管理、分布式缓存、线上告警和多副本部署。
 Docker 配置已经完成，仍需在安装 Docker Desktop 后完成真实镜像构建与容器联调。
-
-## 简历与面试材料
-
-- [可直接复制的简历项目描述](docs/RESUME_PROJECT.md)
-- [5 分钟面试演示脚本](docs/DEMO_SCRIPT.md)
